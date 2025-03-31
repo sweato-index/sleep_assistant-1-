@@ -1,0 +1,122 @@
+/* 睡眠看板容器 */
+#sleep-dashboard-container {
+  position: fixed;
+  top: 50%;
+  right: -300px;
+  transform: translateY(-50%);
+  z-index: 1000;
+  transition: right 0.5s ease;
+}
+
+/* 显示状态 */
+#sleep-dashboard-container.visible {
+  right: 20px;
+}
+
+/* 睡眠看板样式 */
+#sleep-dashboard {
+  width: 280px;
+  background: linear-gradient(135deg, #5abebe 0%, #6aa8f4 100%);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(74, 144, 226, 0.2);
+  overflow: hidden;
+  transform: translateX(100%);
+  opacity: 0;
+  transition: all 0.5s ease;
+}
+
+/* 卡片显示动画 */
+#sleep-dashboard-container.visible #sleep-dashboard {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* 看板头部 */
+.dashboard-header {
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dashboard-title {
+  margin: 0;
+  font-size: 18px;
+  color: #fff;
+}
+
+.dashboard-close-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: opacity 0.2s ease;
+}
+
+.dashboard-close-btn:hover {
+  opacity: 0.8;
+}
+
+/* 统计数据 */
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 16px;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* 图表容器 */
+.chart-container {
+  padding: 16px;
+}
+
+/* 建议区域 */
+.sleep-advice {
+  padding: 16px;
+  font-size: 16px;
+  color: #fff;
+  line-height: 1.6;
+  background: rgba(244, 240, 240, 0.1);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  #sleep-dashboard-container {
+    right: -100%;
+    width: 90%;
+  }
+  
+  #sleep-dashboard-container.visible {
+    right: 5%;
+  }
+  
+  #sleep-dashboard {
+    width: 100%;
+  }
+}

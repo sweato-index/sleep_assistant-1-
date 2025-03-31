@@ -1,0 +1,152 @@
+/* 睡眠小贴士容器 */
+#sleep-tips-container {
+  position: fixed;
+  top: 50%;
+  left: -300px;
+  transform: translateY(-50%);
+  z-index: 1000;
+  transition: left 0.5s ease;
+}
+
+/* 显示状态 */
+#sleep-tips-container.visible {
+  left: 20px;
+}
+
+/* 卡片通用样式 */
+.floating-card {
+  width: 280px;
+  background: linear-gradient(135deg, #7354ff 0%, #8d6eff 100%);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(115, 84, 255, 0.2);
+  margin-bottom: 20px;
+  overflow: hidden;
+  transform: translateX(100%);
+  opacity: 0;
+  transition: all 0.5s ease;
+}
+
+/* 卡片显示动画 */
+#sleep-tips-container.visible .floating-card {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* 卡片头部 */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #fff;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.close-btn:hover {
+  opacity: 0.8;
+}
+
+/* 卡片内容 */
+.card-body {
+  padding: 16px;
+}
+
+.tip-content {
+  position: relative;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #fff;
+  margin: 0;
+  padding-left: 30px;
+}
+
+.tip-content::before {
+  content: "\f0eb";
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  position: absolute;
+  left: 0;
+  top: 2px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 18px;
+}
+
+/* 看板样式 */
+#sleep-dashboard {
+  background: linear-gradient(135deg, #4a90e2 0%, #6aa8f4 100%);
+}
+
+.dashboard-header {
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dashboard-title {
+  margin: 0;
+  font-size: 18px;
+  color: #fff;
+}
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 16px;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .floating-container {
+    right: -100%;
+    width: 90%;
+  }
+  
+  .floating-container.visible {
+    right: 5%;
+  }
+  
+  .floating-card {
+    width: 100%;
+  }
+  
+  .tip-content {
+    padding-left: 25px;
+  }
+  
+  .tip-content::before {
+    font-size: 16px;
+  }
+}

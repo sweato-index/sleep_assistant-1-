@@ -1,0 +1,617 @@
+{% load static %}
+
+<!doctype html>
+<html class="no-js" lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>用户中心 - 睡眠管理系统</title>
+    <meta name="description" content="管理您的个人信息和睡眠数据">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'img/favicon.png' %}">
+
+    <!-- CSS here -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/fontawesome-all.min.css' %}">
+    <link rel="stylesheet" href="{% static 'flat-icon/flaticon.css' %}">
+    <link rel="stylesheet" href="{% static 'css/meanmenu.css' %}">
+    <link rel="stylesheet" href="{% static 'css/slick.css' %}">
+    <link rel="stylesheet" href="{% static 'css/aos.css' %}">
+    <link rel="stylesheet" href="{% static 'css/animate.css' %}">
+    <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}">
+    <link rel="stylesheet" href="{% static 'css/default.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    <link rel="stylesheet" href="{% static 'css/hearder-area.css' %}">
+    <style>
+        .dashboard-nav .nav-link {
+            color: #666;
+            background-color: #f8f9fa;
+            border: 1px solid #eee;
+        }
+
+        .dashboard-nav .nav-link:hover {
+            background-color: #e9ecef;
+            color: #333;
+            transform: translateX(5px);
+        }
+
+        .dashboard-nav .nav-link.active {
+            background-color: #0d6efd;
+            color: white;
+            border: 1px solid #0d6efd;
+            box-shadow: 0 2px 5px rgba(13, 110, 253, 0.2);
+        }
+
+        .tab-content {
+            min-height: 100%;
+            height: auto;
+            overflow: visible;
+        }
+
+        .tab-pane {
+            height: auto;
+            overflow: visible;
+        }
+    </style>
+</head>
+<body style="background-color: #f5f5f5;">
+    <!-- preloader -->
+    <div id="loading">
+        <div id="loading-center">
+            <div id="loading-center-absolute">
+                <div class="object" id="object_one"></div>
+                <div class="object" id="object_two"></div>
+                <div class="object" id="object_three"></div>
+                <div class="object" id="object_four"></div>
+            </div>
+        </div>
+    </div>
+    <!-- preloader end -->
+
+    <!-- ============= header-area-start ==================== -->
+    <header class="header-transfrent">
+      <div class="header-area">
+          <div class="container">
+              <div class="row align-items-center">
+                  <div class="col-xl-1 col-lg-1">
+                      <div class="logo-area">
+                          <a href="{% url 'home' %}"><img src="{% static 'img/logo.png' %}" alt="">
+                      </div>
+                  </div>
+                  <div class="col-xl-8 col-lg-8">
+                      <div class="main-menu">
+                          <nav id="mobile-menu">
+                              <ul>
+                                  <li><a href="{% url 'home' %}">首页</a></li>
+                                  <li><a href="{% url 'science' %}">知识中心</a></li>
+                                  <li><a href="{% url 'tracker' %}">睡眠记录</a></li>
+                                  <li><a href="{% url 'assessment' %}">睡眠评分</a></li>
+                                  <li><a href="{% url 'advice' %}">睡眠助手</a></li>
+                                  <li class="dropdown">
+                                      <a href="{% url 'community' %}">交流社区 <i class="fas fa-chevron-down"></i></a>
+                                      <ul class="dropdown-menu">
+                                          <li><a href="#forum">论坛</a></li>
+                                          <li><a href="#groups">群组</a></li>
+                                          <li><a href="#qna">专家问答</a></li>
+                                          <li><a href="#diary">睡眠日记</a></li>
+                                          <li><a href="#challenges">挑战活动</a></li>
+                                      </ul>
+                                  </li>
+                              </ul>
+                          </nav>
+                      </div>
+                      <div class="mobile-menu"></div>
+                  </div>
+                          <div class="col-xl-3 col-lg-3 d-none d-lg-block">
+                          <div class="header-user-profile f-right">
+                              <div class="user-avatar">
+                              <img src="{% static 'img/author-1.png' %}" alt="用户头像">
+                              </div>
+                              <ul class="dropdown-menu">
+                                  <li><a href="#signinModal" data-toggle="modal">登录</a></li>
+                                  <li><a href="#signupModal" data-toggle="modal">注册</a></li>
+                                  <li><a href="{% url 'profile' %}">用户中心</a></li>
+                              </ul>
+                          </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </header>
+  <!-- ============= header-area-end ====================== -->
+
+     <!-- ========== breadcrumbs-area-start ============== -->
+     <div class="breadcrumbs-area text-center">
+        <div class="breadcrumbs-wrapper pt-110 pb-110">
+            <div class="mk-page-title">
+                <h2>个人主页</h2>
+            </div>
+            <nav class="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a> <i class="flaticon-right-arrow-angle"></i></li>
+                    <li class="breadcrumb-item active" aria-current="page">profile</li>
+                </ol>
+            </nav>
+
+            
+        </div>
+    </div>
+    <!-- =========== breadcrumbs-area-end ================ -->
+
+
+    <!-- ============== main-content-start ============== -->
+<!-- 页面头部：卡片结构 -->
+<section class="profile-wrapper mt-5">
+    <div class="container">
+      <!-- 外部卡片 -->
+      <div class="profile-card bg-white shadow" style="border-radius: 20px; overflow: hidden;">
+        
+        <!-- 顶部封面区域 -->
+        <div class="profile-header position-relative"
+             style="height: 120px; background-color: #e6f0fa; padding-bottom: 0px;">
+          
+          <!-- 顶部"名字"文字，向右空出头像空间（250px） -->
+          <div class="d-flex align-items-end ps-4 pe-4" style="height: 100%;">
+            <div style="width: 250px;"></div>
+            <div class="profile-info mb-3">
+              <h5 class="mb-1" style="font-size: 1.7rem;">张三</h5>
+            </div>
+          </div>
+  
+          <!-- 跨区域头像 -->
+          <div class="avatar-wrapper position-absolute" style="left: 40px; bottom: -70px;">
+                      <img src="{% static 'img/cat1.jpg' %}" class="rounded-circle border border-white shadow"
+                 style="width: 160px; height: 160px; object-fit: cover;">
+          </div>
+        </div>
+  
+        <!-- 白色区域：详细信息 -->
+        <div class="profile-body ps-4 pe-4 pb-4">
+          <div class="d-flex align-items-baseline" style="margin-top: 20px;">
+            <div style="width: 250px;"></div> <!-- 与头像保持对齐 -->
+            <div class="profile-info">
+              <!-- 个人标签 -->
+              <div class="mb-2">
+                <span class="badge rounded-pill bg-light text-dark me-2" style="font-size: 0.9rem; padding: 8px 15px;">
+                  懒羊羊
+                </span>
+                <!-- 可以继续添加更多标签 -->
+                <span class="badge rounded-pill bg-light text-dark me-2" style="font-size: 0.9rem; padding: 8px 15px;">
+                  爱睡觉
+                </span>
+              </div>
+              
+              <!-- 个性签名 -->
+              <p class="text-muted mb-2">专注于睡眠研究的懒羊羊</p>
+              
+              <!-- 其他信息 -->
+              <small class="text-muted">
+                <i class="bi bi-chat-left-text me-1"></i> 00后 |
+                <i class="bi bi-geo-alt me-1"></i> 中国，上海
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <section class="profile-wrapper mt-5">
+    <div class="container" style="margin-top: 20px;">
+      <div class="row">
+  
+        <!-- 左侧导航栏 -->
+        <div class="col-lg-3 mt-4">
+          <div class="dashboard-nav bg-white p-4 shadow-sm" style="border-radius: 15px;">
+            <h5 class="mb-4">用户中心</h5>
+            <ul class="nav flex-column nav-pills" id="dashboard-tab" role="tablist">
+              <li class="nav-item mb-3">
+                <a class="nav-link active d-flex align-items-center" id="basic-tab" data-bs-toggle="pill" data-bs-target="#basic" role="tab">
+                  <i class="bi bi-person-circle me-2"></i>
+                  基本信息
+                </a>
+              </li>
+              <li class="nav-item mb-3">
+                <a class="nav-link d-flex align-items-center" id="sleep-tab" data-bs-toggle="pill" data-bs-target="#sleep" role="tab">
+                  <i class="bi bi-moon-stars me-2"></i>
+                  睡眠记录
+                </a>
+              </li>
+              <li class="nav-item mb-3">
+                <a class="nav-link d-flex align-items-center" id="account-tab" data-bs-toggle="pill" data-bs-target="#account" role="tab">
+                  <i class="bi bi-gear me-2"></i>
+                  账号设置
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link d-flex align-items-center" id="privacy-tab" data-bs-toggle="pill" data-bs-target="#privacy" role="tab">
+                  <i class="bi bi-shield-lock me-2"></i>
+                  数据与隐私
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+  
+        <!-- 右侧内容区域 -->
+        <div class="col-lg-9 mt-4">
+          <div class="tab-content" id="dashboard-tabContent">
+            <!-- 基本信息面板 -->
+            <div class="tab-pane fade show active" id="basic" role="tabpanel">
+              <div class="bg-white p-4 shadow-sm" style="border-radius: 15px;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                  <h5 class="mb-0">基本信息</h5>
+                  <button class="btn btn-primary" id="editProfileBtn">编辑资料</button>
+                </div>
+
+                <form id="profileForm">
+                  <!-- 头像上传 -->
+                  <div class="text-center mb-4">
+                    <div class="position-relative d-inline-block">
+                      <img src="{% static 'img/cat1.jpg' %}" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover;">
+                      <label for="avatarUpload" class="position-absolute bottom-0 end-0 bg-white rounded-circle p-2 shadow-sm" style="cursor: pointer;">
+                        <i class="bi bi-camera"></i>
+                      </label>
+                      <input type="file" id="avatarUpload" class="d-none" accept="image/*">
+                    </div>
+                  </div>
+
+                  <!-- 基本信息表单 -->
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">昵称</label>
+                      <input type="text" class="form-control" value="懒羊羊">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">账号</label>
+                      <input type="text" class="form-control" value="user123" disabled>
+                      <div class="form-text">账号注册后不可修改</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">邮箱</label>
+                      <div class="input-group">
+                        <input type="email" class="form-control" value="example@email.com">
+                        <button class="btn btn-outline-secondary" type="button">验证</button>
+                      </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">性别</label>
+                      <div>
+                        <div class="form-check form-check-inline">
+                          <input class="form-check-input" type="radio" name="gender" id="male" value="male">
+                          <label class="form-check-label" for="male">男</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                          <input class="form-check-input" type="radio" name="gender" id="female" value="female">
+                          <label class="form-check-label" for="female">女</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                          <input class="form-check-input" type="radio" name="gender" id="other" value="other">
+                          <label class="form-check-label" for="other">其他</label>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">生日</label>
+                      <input type="date" class="form-control">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">所在地</label>
+                      <input type="text" class="form-control" placeholder="省市地址">
+                    </div>
+                    <div class="col-12 mb-3">
+                      <label class="form-label">个性签名</label>
+                      <textarea class="form-control" rows="3" maxlength="200" placeholder="写点什么来介绍自己吧（最多200字）"></textarea>
+                      <div class="form-text text-end">0/200</div>
+                    </div>
+                  </div>
+
+                  <div class="text-end">
+                    <button type="submit" class="btn btn-primary px-4">保存修改</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <!-- 睡眠记录面板 -->
+            <div class="tab-pane fade" id="sleep" role="tabpanel">
+              <div class="bg-white p-4 shadow-sm" style="border-radius: 15px;">
+                <h5 class="mb-4">睡眠记录</h5>
+
+                <!-- 数据总览卡片 -->
+                <div class="row mb-4">
+                  <!-- 平均睡眠时长卡片 -->
+                  <div class="col-md-6 mb-3">
+                    <div class="card border-0" style="background-color: #f8f9ff;">
+                      <div class="card-body">
+                        <div class="d-flex align-items-center">
+                          <div class="rounded-circle p-3 bg-primary bg-opacity-10 me-3">
+                            <i class="bi bi-moon-stars text-primary"></i>
+                          </div>
+                          <div>
+                            <h6 class="card-subtitle mb-1 text-muted">最近一周平均睡眠</h6>
+                            <h4 class="card-title mb-0">7.5 小时</h4>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 上次记录日期卡片 -->
+                  <div class="col-md-6 mb-3">
+                    <div class="card border-0" style="background-color: #f8f9ff;">
+                      <div class="card-body">
+                        <div class="d-flex align-items-center">
+                          <div class="rounded-circle p-3 bg-success bg-opacity-10 me-3">
+                            <i class="bi bi-calendar-check text-success"></i>
+                          </div>
+                          <div>
+                            <h6 class="card-subtitle mb-1 text-muted">上次记录日期</h6>
+                            <h4 class="card-title mb-0">2024-03-20</h4>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 睡眠趋势图预览 -->
+                <div class="card mb-4 border-0" style="background-color: #f8f9ff;">
+                  <div class="card-body">
+                    <h6 class="card-title mb-3">睡眠趋势</h6>
+                    <div class="sleep-chart" style="height: 200px;">
+                      <!-- 这里可以放置一个简单的图表 -->
+                      <img src="{% static 'img/sleep-chart-preview.png' %}" class="img-fluid" alt="睡眠趋势图预览">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 跳转按钮 -->
+                <div class="text-center">
+                  <a href="{% url 'tracker' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-graph-up me-2"></i>
+                    查看详细睡眠记录
+                  </a>
+                  <div class="text-muted mt-2">
+                    <small>点击查看更多详细的睡眠数据分析</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 账号设置面板 -->
+            <div class="tab-pane fade" id="account" role="tabpanel">
+              <div class="bg-white p-4 shadow-sm" style="border-radius: 15px;">
+                <h5 class="mb-4">账号设置</h5>
+
+                <!-- 修改密码部分 -->
+                <div class="card mb-4 border-0">
+                  <div class="card-body">
+                    <h6 class="card-title mb-3">修改密码</h6>
+                    <form id="passwordForm">
+                      <div class="mb-3">
+                        <label class="form-label">当前密码</label>
+                        <input type="password" class="form-control" required>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">新密码</label>
+                        <input type="password" class="form-control" required>
+                        <div class="form-text">密码长度至少8位，包含字母和数字</div>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">确认新密码</label>
+                        <input type="password" class="form-control" required>
+                      </div>
+                      <div class="text-end">
+                        <button type="submit" class="btn btn-primary">更新密码</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+
+                <!-- 提醒设置部分 -->
+                <div class="card mb-4 border-0">
+                  <div class="card-body">
+                    <h6 class="card-title mb-3">提醒设置</h6>
+                    <form id="reminderForm">
+                      <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
+                          <label class="form-label">
+                            <i class="bi bi-moon-stars me-2"></i>
+                            睡觉时间提醒
+                          </label>
+                          <input type="time" class="form-control" value="22:30">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                          <label class="form-label">
+                            <i class="bi bi-sunrise me-2"></i>
+                            起床时间提醒
+                          </label>
+                          <input type="time" class="form-control" value="07:00">
+                        </div>
+                      </div>
+
+                      <div class="mb-3">
+                        <label class="form-label">提醒方式</label>
+                        <div class="form-check mb-2">
+                          <input class="form-check-input" type="checkbox" id="browserNotification" checked>
+                          <label class="form-check-label" for="browserNotification">
+                            本地浏览器通知
+                          </label>
+                        </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" id="emailNotification">
+                          <label class="form-check-label" for="emailNotification">
+                            邮箱推送
+                          </label>
+                        </div>
+                      </div>
+
+                      <div class="text-end">
+                        <button type="submit" class="btn btn-primary">保存提醒设置</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+
+                <!-- 注销账号部分 -->
+                <div class="card border-0 bg-light">
+                  <div class="card-body">
+                    <h6 class="card-title text-danger mb-3">注销账号</h6>
+                    <p class="card-text text-muted mb-3">
+                      注销后，您的账号将被永久删除，所有数据将无法恢复。
+                    </p>
+                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                      注销账号
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 数据与隐私面板 -->
+            <div class="tab-pane fade" id="privacy" role="tabpanel">
+              <div class="bg-white p-4 shadow-sm" style="border-radius: 15px;">
+                <h5 class="mb-4">数据与隐私</h5>
+
+                <!-- 数据导出部分 -->
+                <div class="card mb-4 border-0">
+                  <div class="card-body">
+                    <h6 class="card-title mb-3">数据导出</h6>
+                    <p class="text-muted mb-3">
+                      您可以导出所有的睡眠记录数据，支持多种格式。
+                    </p>
+                    <div class="mb-3">
+                      <label class="form-label">选择导出格式</label>
+                      <select class="form-select mb-3">
+                        <option value="json">JSON 格式</option>
+                        <option value="csv">CSV 格式（可用 Excel 打开）</option>
+                      </select>
+                    </div>
+                    <button class="btn btn-primary">
+                      <i class="bi bi-download me-2"></i>
+                      导出全部睡眠数据
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 隐私设置部分 -->
+                <div class="card border-0">
+                  <div class="card-body">
+                    <h6 class="card-title mb-3">隐私设置</h6>
+                    <form id="privacyForm">
+                      <!-- 公开睡眠习惯设置 -->
+                      <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
+                        <div>
+                          <h6 class="mb-1">公开睡眠习惯</h6>
+                          <p class="text-muted mb-0 small">
+                            允许其他用户查看您的睡眠数据统计
+                          </p>
+                        </div>
+                        <div class="form-check form-switch">
+                          <input class="form-check-input" type="checkbox" id="shareHabits">
+                        </div>
+                      </div>
+
+                      <!-- 提醒邮件设置 -->
+                      <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
+                        <div>
+                          <h6 class="mb-1">接收提醒邮件</h6>
+                          <p class="text-muted mb-0 small">
+                            接收睡眠提醒和每周睡眠报告
+                          </p>
+                        </div>
+                        <div class="form-check form-switch">
+                          <input class="form-check-input" type="checkbox" id="allowEmails" checked>
+                        </div>
+                      </div>
+
+                      <!-- 个性化建议设置 -->
+                      <div class="d-flex justify-content-between align-items-center py-3 mb-4">
+                        <div>
+                          <h6 class="mb-1">启用个性化建议</h6>
+                          <p class="text-muted mb-0 small">
+                            基于您的睡眠数据提供改善建议
+                          </p>
+                        </div>
+                        <div class="form-check form-switch">
+                          <input class="form-check-input" type="checkbox" id="personalizedTips" checked>
+                        </div>
+                      </div>
+
+                      <div class="text-end">
+                        <button type="submit" class="btn btn-primary">
+                          保存隐私设置
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 注销账号确认弹窗 -->
+            <div class="modal fade" id="deleteAccountModal" tabindex="-1">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title text-danger">确认注销账号？</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="alert alert-warning">
+                      <i class="bi bi-exclamation-triangle me-2"></i>
+                      警告：此操作不可撤销！
+                    </div>
+                    <p>注销账号后：</p>
+                    <ul class="text-muted">
+                      <li>所有睡眠记录将被永久删除</li>
+                      <li>个人资料将被清除</li>
+                      <li>无法恢复已删除的数据</li>
+                    </ul>
+                    <div class="form-check mb-3">
+                      <input class="form-check-input" type="checkbox" id="confirmDelete">
+                      <label class="form-check-label" for="confirmDelete">
+                        我已了解注销账号的后果
+                      </label>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled>
+                      确认注销
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+    <!-- ============= main-content-end ================= -->
+
+    <!-- JS here -->
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/jquery.meanmenu.js' %}"></script>
+    <script src="{% static 'js/slick.min.js' %}"></script>
+    <script src="{% static 'js/aos.js' %}"></script>
+    <script src="{% static 'js/jquery.counterup.min.js' %}"></script>
+    <script src="{% static 'js/isotope.pkgd.min.js' %}"></script>
+    <script src="{% static 'js/wow.min.js' %}"></script>
+    <script src="{% static 'js/jquery.magnific-popup.min.js' %}"></script>
+    <script src="{% static 'js/waypoints.min.js' %}"></script>
+    <script src="{% static 'js/plugins.js' %}"></script>
+    <script src="{% static 'js/velocity.min.js' %}"></script>
+    <script src="{% static 'js/velocity.ui.min.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

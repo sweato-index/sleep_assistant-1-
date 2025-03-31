@@ -1,0 +1,163 @@
+
+/* Navigation Dropdown Styles */
+.main-menu .dropdown {
+    position: relative;
+}
+
+.main-menu .dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 150px;
+    background: #fff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    padding: 10px 0;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+    font-size: 14px;
+}
+
+.main-menu .dropdown-menu li {
+    padding: 6px 15px;
+}
+
+.main-menu .dropdown-menu a {
+    color: #2c3e50;
+    display: block;
+    transition: all 0.3s ease;
+}
+
+.main-menu .dropdown-menu a:hover {
+    color: #007bff;
+    padding-left: 25px;
+}
+
+.main-menu .dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+/* User Profile Dropdown Styles */
+.header-user-profile {
+    position: relative;
+    z-index: 1001;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.header-user-profile .dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 50px;
+    min-width: 180px;
+    background: #fff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    padding: 10px 0;
+    z-index: 1002;
+    animation: fadeIn 0.3s ease;
+}
+
+.header-user-profile .dropdown-menu li {
+    padding: 8px 20px;
+}
+
+.header-user-profile .dropdown-menu a {
+    color: #2c3e50;
+    display: block;
+    transition: all 0.3s ease;
+}
+
+.header-user-profile .dropdown-menu a:hover {
+    color: #007bff;
+    padding-left: 25px;
+}
+
+.header-user-profile {
+    position: relative;
+}
+
+.header-user-profile:hover .dropdown-menu,
+.header-user-profile .dropdown-menu:hover {
+    display: block;
+    z-index: 9999;
+}
+
+.header-user-profile .dropdown-menu {
+    margin-top: 0;
+    padding: 10px 0;
+    top: 100%;
+    right: 0;
+    min-width: 150px;
+    font-size: 14px;
+}
+
+.header-user-profile .dropdown-menu::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    z-index: 9998;
+}
+
+.header-user-profile .dropdown-menu li {
+    padding: 6px 15px;
+}
+
+.user-avatar:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.2);
+}
+
+/* Navigation Link Spacing */
+.main-menu > nav > ul {
+    height: 70px;
+    display: flex;
+    align-items: center;
+}
+
+.main-menu > nav > ul > li {
+    margin: 0 15px !important;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.main-menu > nav > ul > li > a {
+    padding: 20px 15px !important;
+    position: relative;
+}
+
+.main-menu > nav > ul > li > a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 100%;
+    height: 2px;
+    background: #007bff;
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.main-menu > nav > ul > li > a:hover::after {
+    transform: scaleX(1);
+}

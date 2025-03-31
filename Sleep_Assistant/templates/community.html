@@ -1,0 +1,323 @@
+{% load static %}
+<!doctype html>
+<html class="no-js" lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>睡眠社区 - 睡眠管理系统</title>
+    <meta name="description" content="与更多用户交流睡眠经验，分享助眠技巧">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'img/favicon.png' %}">
+
+    <!-- CSS here -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/fontawesome-all.min.css' %}">
+    <link rel="stylesheet" href="{% static 'flat-icon/flaticon.css' %}">
+    <link rel="stylesheet" href="{% static 'css/meanmenu.css' %}">
+    <link rel="stylesheet" href="{% static 'css/slick.css' %}">
+    <link rel="stylesheet" href="{% static 'css/aos.css' %}">
+    <link rel="stylesheet" href="{% static 'css/animate.css' %}">
+    <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}">
+    <link rel="stylesheet" href="{% static 'css/default.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    <link rel="stylesheet" href="{% static 'css/community.css' %}">
+</head>
+<body>
+    <!-- preloader -->
+    <div id="loading">
+        <div id="loading-center">
+            <div id="loading-center-absolute">
+                <div class="object" id="object_one"></div>
+                <div class="object" id="object_two"></div>
+                <div class="object" id="object_three"></div>
+                <div class="object" id="object_four"></div>
+            </div>
+        </div>
+    </div>
+    <!-- preloader end -->
+
+    <!-- ============= header-area-start ==================== -->
+    <header class="header-transfrent">
+        <div class="header-area">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-xl-1 col-lg-1">
+                            <div class="logo-area">
+                            <a href="{% url 'home' %}"><img src="{% static 'img/logo.png' %}" alt=""></a>
+                        </div>
+                    </div>
+                    <div class="col-xl-8 col-lg-8">
+                        <div class="main-menu">
+                            <nav id="mobile-menu">
+                                <ul>
+                                    <li><a href="{% url 'home' %}">首页</a></li>
+                                    <li><a href="{% url 'science' %}">知识中心</a></li>
+                                    <li><a href="{% url 'tracker' %}">睡眠记录</a></li>
+                                    <li><a href="{% url 'assessment' %}">睡眠评分</a></li>
+                                    <li><a href="{% url 'advice' %}">睡眠助手</a></li>
+                                    <li class="dropdown">
+                                        <a href="{% url 'community' %}">交流社区 <i class="fas fa-chevron-down"></i></a>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="#forum">论坛</a></li>
+                                            <li><a href="#groups">群组</a></li>
+                                            <li><a href="#qna">专家问答</a></li>
+                                            <li><a href="#diary">睡眠日记</a></li>
+                                            <li><a href="#challenges">挑战活动</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                        <div class="mobile-menu"></div>
+                    </div>
+                            <div class="col-xl-3 col-lg-3 d-none d-lg-block">
+                            <div class="header-user-profile f-right">
+                                <div class="user-avatar">
+                                    <img src="{% static 'img/author-1.png' %}" alt="用户头像">
+                                </div>
+                                <ul class="dropdown-menu">
+                                    <li><a href="#signinModal" data-toggle="modal">登录</a></li>
+                                    <li><a href="#signupModal" data-toggle="modal">注册</a></li>
+                                    <li><a href="{% url 'profile' %}">用户中心</a></li>
+                                </ul>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- ============= header-area-end ====================== -->
+
+    <!-- ========== breadcrumbs-area-start ============== -->
+    <div class="breadcrumbs-area text-center">
+        <div class="breadcrumbs-wrapper pt-110 pb-110">
+            <div class="mk-page-title">
+                <h2>睡眠社区</h2>
+            </div>
+            <nav class="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a> <i class="flaticon-right-arrow-angle"></i></li>
+                    <li class="breadcrumb-item active" aria-current="page">community</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <!-- =========== breadcrumbs-area-end ================ -->
+
+    <!-- ============== main-content-start ============== -->
+    <div class="main-content">
+        <div class="container">
+            <!-- <h1 data-aos="fade-up" data-aos-duration="800">睡眠社区</h1> -->
+            <div class="community-tabs" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
+                <ul class="nav nav-tabs" data-aos="fade-up" data-aos-duration="800" data-aos-delay="400">
+                    <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#forum">论坛/讨论区</a></li>
+                    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#groups">群组</a></li>
+                    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#qna">专家问答</a></li>
+                    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#diary">睡眠日记</a></li>
+                    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#challenges">挑战活动</a></li>
+                </ul>
+
+                <div class="tab-content">
+                    <!-- 论坛/讨论区 -->
+                    <div id="forum" class="tab-pane fade show active">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="forum-categories">
+                                    <h3>讨论主题</h3>
+                                    <div class="category-item">
+                                        <h4>失眠问题</h4>
+                                        <p>讨论失眠原因和解决方案</p>
+                                        <a href="{% url 'forum_topic' %}" class="btn btn-primary">查看话题</a>
+                                    </div>
+                                    <div class="category-item">
+                                        <h4>睡眠呼吸暂停</h4>
+                                        <p>分享治疗经验和建议</p>
+                                        <a href="{% url 'forum_topic' %}" class="btn btn-primary">查看话题</a>
+                                    </div>
+                                    <!-- 更多主题... -->
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="forum-sidebar">
+                                    <h3>热门讨论</h3>
+                                    <ul class="hot-topics">
+                                        <li><a href="#">如何快速入睡？</a></li>
+                                        <li><a href="#">褪黑素使用体验</a></li>
+                                        <li><a href="#">午睡的最佳时长</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 群组 -->
+                    <div id="groups" class="tab-pane fade">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="group-list">
+                                    <h3>推荐群组</h3>
+                                    <div class="group-item">
+                                        <h4>早起者联盟</h4>
+                                        <p>帮助养成早起习惯</p>
+                                        <button class="btn btn-primary">加入群组</button>
+                                    </div>
+                                    <div class="group-item">
+                                        <h4>冥想助眠小组</h4>
+                                        <p>分享冥想技巧和经验</p>
+                                        <button class="btn btn-primary">加入群组</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="create-group">
+                                    <h3>创建新群组</h3>
+                                    <form>
+                                        <div class="form-group">
+                                            <label>群组名称</label>
+                                            <input type="text" class="form-control">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>群组描述</label>
+                                            <textarea class="form-control" rows="3"></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">创建群组</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 专家问答 -->
+                    <div id="qna" class="tab-pane fade">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="expert-questions">
+                                    <h3>最新问题</h3>
+                                    <div class="question-item">
+                                        <h4>如何改善睡眠质量？</h4>
+                                        <p>专家回答：建议保持规律的作息时间...</p>
+                                        <a href="#" class="btn btn-primary">查看详情</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="ask-question">
+                                    <h3>向专家提问</h3>
+                                    <form>
+                                        <div class="form-group">
+                                            <label>问题标题</label>
+                                            <input type="text" class="form-control">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>问题描述</label>
+                                            <textarea class="form-control" rows="3"></textarea>
+                                        </div>
+                                    <button type="submit" class="btn btn-primary">提交问题</button>
+                                    </form>
+                                    <div class="mt-5 mb-4 text-center">
+                                        <a href="{% url 'ai_assistant' %}" class="btn btn-outline-primary btn-lg">
+                                            <i class="fas fa-robot mr-2"></i>
+                                            问问AI助手的建议吧
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 睡眠日记 -->
+                    <div id="diary" class="tab-pane fade">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="diary-sharing">
+                                    <h3>分享你的睡眠日记</h3>
+                                    <form>
+                                        <div class="form-group">
+                                            <label>睡眠时长</label>
+                                            <input type="text" class="form-control">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>睡眠质量评分</label>
+                                            <input type="number" min="1" max="10" class="form-control">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>备注</label>
+                                            <textarea class="form-control" rows="3"></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">分享日记</button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="diary-tips">
+                                    <h3>改善建议</h3>
+                                    <ul>
+                                        <li>保持规律作息</li>
+                                        <li>睡前避免使用电子设备</li>
+                                        <li>保持卧室环境舒适</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 挑战活动 -->
+                    <div id="challenges" class="tab-pane fade">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="challenge-list">
+                                    <h3>进行中的挑战</h3>
+                                    <div class="challenge-item">
+                                        <h4>7天早睡计划</h4>
+                                        <p>连续7天在10点前入睡</p>
+                                        <button class="btn btn-primary">加入挑战</button>
+                                    </div>
+                                    <div class="challenge-item">
+                                        <h4>30天冥想挑战</h4>
+                                        <p>每天进行10分钟冥想</p>
+                                        <button class="btn btn-primary">加入挑战</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="challenge-progress">
+                                    <h3>我的挑战进度</h3>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                    <p>7天早睡计划：2/7天完成</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ============= main-content-end ================= -->
+
+    <!-- Chat Assistant CSS -->
+    <link rel="stylesheet" href="{% static 'css/chat-assistant.css' %}">
+    
+    <!-- JS here -->
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/jquery.meanmenu.js' %}"></script>
+    <script src="{% static 'js/slick.min.js' %}"></script>
+    <script src="{% static 'js/aos.js' %}"></script>
+    <script src="{% static 'js/jquery.counterup.min.js' %}"></script>
+    <script src="{% static 'js/isotope.pkgd.min.js' %}"></script>
+    <script src="{% static 'js/wow.min.js' %}"></script>
+    <script src="{% static 'js/jquery.magnific-popup.min.js' %}"></script>
+    <script src="{% static 'js/waypoints.min.js' %}"></script>
+    <script src="{% static 'js/plugins.js' %}"></script>
+    <script src="{% static 'js/velocity.min.js' %}"></script>
+    <script src="{% static 'js/velocity.ui.min.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/chat-assistant.js' %}"></script>
+    <script src="{% static 'js/community.js' %}"></script>
+
+</body>
+</html>

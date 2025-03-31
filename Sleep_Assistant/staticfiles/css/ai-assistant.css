@@ -1,0 +1,43 @@
+/* AI助手悬浮球 */
+.ai-assistant-float {
+  position: fixed;
+  right: 10px;
+  bottom: -120px;  /* 增加与睡眠看板的距离 */
+  z-index: 1000;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #b178cf 0%, #5abebe 100%);
+  box-shadow: 0 4px 20px rgba(74, 144, 226, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.ai-assistant-float:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 30px rgba(74, 144, 226, 0.4);
+}
+
+.ai-assistant-float img {
+  width: 32px;
+  height: 32px;
+  filter: brightness(0) invert(1);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .ai-assistant-float {
+    width: 50px;
+    height: 50px;
+    right: 10px;  /* 修改为right */
+    bottom: 80px;
+  }
+  
+  .ai-assistant-float img {
+    width: 24px;
+    height: 24px;
+  }
+}
