@@ -28,6 +28,7 @@
     <link rel="stylesheet" href="{% static 'css/sleep-dashboard.css' %}">
     <link rel="stylesheet" href="{% static 'css/ai-assistant.css' %}">
     <link rel="stylesheet" href="{% static 'css/hearder-area.css' %}">
+    <link rel="stylesheet" href="{% static 'css/login-register.css' %}">
 </head>
 <body>
 
@@ -84,8 +85,8 @@
                                     <img src="{% static 'img/author-1.png' %}" alt="用户头像">
                                 </div>
                                 <ul class="dropdown-menu">
-                                    <li><a href="#signinModal" data-toggle="modal">登录</a></li>
-                                    <li><a href="#signupModal" data-toggle="modal">注册</a></li>
+                                    <li><a href="#signinModal" data-bs-toggle="modal">登录</a></li>
+                                    <li><a href="#signupModal" data-bs-toggle="modal">注册</a></li>
                                     <li><a href="{% url 'profile' %}">用户中心</a></li>
                                 </ul>
                             </div>
@@ -106,8 +107,8 @@
                         <h2>让每一个夜晚更安心</h2>
                         <p>专业的睡眠管理系统，帮助您记录、分析和改善睡眠质量</p>
                         <div class="slider-button">
-                            <a href="#signupModal" data-toggle="modal" class="btn slider-btn active-btn">立即注册</a>
-                            <a href="#signinModal" data-toggle="modal" class="btn slider-btn service">登录系统</a>
+                            <a href="#signupModal" data-bs-toggle="modal" class="btn slider-btn active-btn">立即注册</a>
+                            <a href="#signinModal" data-bs-toggle="modal" class="btn slider-btn service">登录系统</a>
                         </div>
                     </div>
                 </div>
@@ -364,6 +365,97 @@
         </div>
     </div>
 
+    <!-- 登录注册模态框 -->
+    <div class="modal fade" id="signinModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">登录系统</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="loginPhone">手机号</label>
+                            <input type="text" class="form-control" id="loginPhone" placeholder="请输入手机号" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">密码</label>
+                            <input type="password" class="form-control" id="loginPassword" placeholder="请输入密码" required>
+                        </div>
+                        <div class="form-group form-check">
+                            <input type="checkbox" class="form-check-input" id="rememberMe">
+                            <label class="form-check-label" for="rememberMe">记住我</label>
+                            <a href="#" class="float-right">忘记密码?</a>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">登录</button>
+                    </form>
+                    <div class="text-center mt-3">
+                        <p>还没有账号? <a href="#signupModal" data-bs-toggle="modal" data-dismiss="modal">立即注册</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 注册模态框 -->
+    <div class="modal fade" id="signupModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">用户注册</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="registerForm">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="registerName">用户名</label>
+                            <input type="text" class="form-control" id="registerName" placeholder="请输入用户名" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPhone">手机号</label>
+                            <input type="text" class="form-control" id="registerPhone" placeholder="请输入手机号" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerEmail">邮箱</label>
+                            <input type="email" class="form-control" id="registerEmail" placeholder="请输入邮箱" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">密码</label>
+                            <input type="password" class="form-control" id="registerPassword" placeholder="请输入密码(6-20位)" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">确认密码</label>
+                            <input type="password" class="form-control" id="confirmPassword" placeholder="请再次输入密码" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="verificationCode">验证码</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="verificationCode" placeholder="请输入验证码" required>
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary" type="button" id="getCodeBtn">获取验证码</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group form-check">
+                            <input type="checkbox" class="form-check-input" id="agreeTerms" required>
+                            <label class="form-check-label" for="agreeTerms">我已阅读并同意<a href="#">用户协议</a></label>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">注册</button>
+                    </form>
+                    <div class="text-center mt-3">
+                        <p>已有账号? <a href="#signinModal" data-bs-toggle="modal" data-dismiss="modal">立即登录</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 睡眠看板容器 -->
     <div id="sleep-dashboard-container">
         <!-- 睡眠看板 -->
@@ -395,13 +487,19 @@
         <img src="{% static 'img/ai-icon.png' %}" alt="AI助手">
     </div>
 
+
     <!-- JS here -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 确保jQuery最先加载 -->
     <script src="{% static 'js/jquery.min.js' %}"></script>
-    <script src="{% static 'js/sleep-dashboard.js' %}"></script>
+    <!-- 然后是Popper.js -->
     <script src="{% static 'js/popper.min.js' %}"></script>
+    <!-- 接着是Bootstrap JS -->
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <!-- 其他JS文件 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'js/sleep-dashboard.js' %}"></script>
     <script src="{% static 'js/jquery.meanmenu.js' %}"></script>
+    <script src="{% static 'js/login-register.js' %}"></script>
     <script src="{% static 'js/slick.min.js' %}"></script>
     <script src="{% static 'js/aos.js' %}"></script>
     <script src="{% static 'js/jquery.counterup.min.js' %}"></script>

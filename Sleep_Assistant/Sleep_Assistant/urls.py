@@ -19,7 +19,8 @@ from django.urls import path
 from myapp.views import (
     home, science, tracker, assessment, 
     advice, community, profile, blog_details,
-    ai_assistant, forum_topic
+    ai_assistant, forum_topic, get_all_user_ids,
+    register
 )
 
 urlpatterns = [
@@ -34,4 +35,6 @@ urlpatterns = [
     path('blog-details/', blog_details, name='blog_details'),
     path('ai-assistant/', ai_assistant, name='ai_assistant'),
     path('forum-topic/', forum_topic, name='forum_topic'),
+    path('api/user_ids/', get_all_user_ids, name='get_all_user_ids'),
+    path('api/register/', register, name='register'),
 ]

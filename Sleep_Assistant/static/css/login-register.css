@@ -1,0 +1,124 @@
+/* 登录注册模态框样式 */
+.modal-content {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    padding-bottom: 20px;
+}
+
+.modal-header {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.modal-title {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.modal-body {
+    padding: 25px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-control {
+    height: 45px;
+    border-radius: 5px;
+    border: 1px solid #e0e0e0;
+    padding-left: 15px;
+    transition: border-color 0.2s ease;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    border-color: #3498db;
+}
+
+.btn-primary {
+    background-color: #3498db;
+    border: none;
+    height: 45px;
+    border-radius: 5px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+}
+
+.form-check-label {
+    color: #7f8c8d;
+}
+
+.float-right {
+    color: #3498db;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.float-right:hover {
+    color: #2980b9;
+    text-decoration: underline;
+}
+
+.text-center a {
+    color: #3498db;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.text-center a:hover {
+    color: #2980b9;
+    text-decoration: underline;
+}
+
+/* 验证码按钮样式 */
+#getCodeBtn {
+    height: 45px;
+    border-radius: 0 5px 5px 0;
+}
+
+/* 响应式调整 */
+@media (max-width: 576px) {
+    .modal-dialog {
+        margin: 10px;
+    }
+    
+    .modal-body {
+        padding: 20px;
+    }
+}
+
+/* 确保模态框可见 */
+.modal-dialog {
+    z-index: 1050;
+    position: relative;
+    width: 450px;
+    max-width: 90%;
+    margin: 1.75rem auto;
+}
+
+.modal-content {
+    z-index: 1060;
+}
+
+/* 修复动画效果 */
+.modal.fade .modal-dialog {
+    transition: all 0.3s ease-out;
+    transform: translate(0, -50px);
+    opacity: 0;
+}
+
+.modal.show .modal-dialog {
+    transform: none;
+    opacity: 1;
+}
+
+/* 禁用Velocity动画冲突 */
+.modal {
+    animation: none !important;
+}

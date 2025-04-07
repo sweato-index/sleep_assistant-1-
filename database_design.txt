@@ -1,0 +1,73 @@
+user:
+
+user_id char(10) Primary Key
+phone_number varchar(20) NotNull UNIQUE
+password varchar NotNull
+user_name varchar(20) default=phone_number
+age int(4)
+user_type char(2) NotNull
+gender char(2) (0:男,1:女,2:其他)
+tag varchar(10)
+description varchar(40)
+birthday datetime
+email varchar(20) UNIQUE
+sleep_notice varchar(8)
+wake_notice varchar(8)
+
+sleep_record:
+
+record_id char(15) Primary Key
+user_id char(10) Primary Key Foreign Key
+record_time datetime NotNull
+sleep_time datetime NotNull
+wake_time datetime NotNull
+rating varchar(2)
+
+document:
+
+doc_id char(10) Primary Key
+doc_type char(2) NotNull (0:睡眠知识,1:睡眠话题)
+post_user_id
+title varchar(20) NotNull
+summary varchar(30)
+text varchar(1000)
+image_url varchar(20)
+
+doc_user_action:
+
+action_id char(10) Primary Key
+doc_id char(10) Foreign Key
+user_id char(10) Foreign Key
+action_type NotNull (0:点赞,1:收藏)
+create_time datetime
+
+doc_comment:
+
+comment_id char(10) Primary Key
+doc_id char(10) Foreign Key
+user_id char(10) Foreign Key
+parent_id char(10) (回复他人评论时，父评论id)
+comment varchar(50) NotNull
+create_time datetime NotNull
+status char(2) (0:存在,1:删除)
+
+sleep_challenge:
+
+challenge_id char(10) Primary Key
+challenge_title varchar(20) NotNull
+initiator_id char(10) NotNull
+create_time datetime NotNull
+status char(2) (0:正在进行中,1:已结束)
+
+user_challenge:
+user_id char(10) Primary Key Foreign Key
+challenge_id char(10) Primary Key Foreign Key
+update_date datetime
+status char(2) (0:正在进行中,1:成功,2:失败)
+
+ai_qa:
+qa_id: Primary Key
+user_id: Foreign Key
+qa_content: varchar(100) NotNull
+create_time datetime NotNull
+answers: varchar(100)
