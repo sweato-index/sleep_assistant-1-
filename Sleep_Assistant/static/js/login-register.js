@@ -45,8 +45,8 @@ $(document).ready(function() {
             return;
         }
         
-        // 模拟登录请求
-        simulateLogin(phone, password);
+        // 真实登录请求
+        loginUser(phone, password);
     });
 
     // 注册表单验证
@@ -122,7 +122,6 @@ $(document).ready(function() {
                 if (response.success) {
                     showAlert('注册成功', 'success');
                     $('#signupModal').modal('hide');
-                    // 可以添加跳转逻辑
                 } else {
                     showAlert(response.message, 'danger');
                 }
@@ -185,30 +184,32 @@ $(document).ready(function() {
         }, 3000);
     }
 
-    // 模拟登录请求
-    function simulateLogin(phone, password) {
-        showAlert('登录请求发送中...', 'info');
-        
-        setTimeout(() => {
-            showAlert('登录成功', 'success');
-            $('#signinModal').modal('hide');
-            // 这里可以添加登录成功后的跳转逻辑
-        }, 1500);
-    }
-
-    // 模拟注册请求
-    function simulateRegister(name, phone, password, code) {
-        showAlert('注册请求发送中...', 'info');
-        
-        setTimeout(() => {
-            showAlert('注册成功', 'success');
-            $('#signupModal').modal('hide');
-            // 这里可以添加注册成功后的跳转逻辑
-        }, 1500);
-    }
-
-    // 模拟发送验证码
-    function simulateSendCode(phone) {
-        showAlert('验证码已发送至您的手机', 'info');
-    }
+// 真实登录请求
+function loginUser(phone, password) {
+    showAlert('登录请求发送中...', 'info');
+    
+    $.ajax({
+        url: '/api/login/',
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val()
+        },
+        data: {
+            phone: phone,
+            password: password
+        },
+        success: function(response) {
+            if (response.success) {
+                showAlert('登录成功', 'success');
+                $('#signinModal').modal('hide');
+                auth.login(response.user);
+            } else {
+                showAlert(response.message, 'danger');
+            }
+        },
+        error: function(xhr) {
+            showAlert('登录失败: ' + (xhr.responseJSON?.message || '服务器错误'), 'danger');
+        }
+    });
+}
 });

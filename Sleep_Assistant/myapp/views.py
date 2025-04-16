@@ -40,8 +40,67 @@ def forum_topic(request):
     return render(request, "forum-topic.html")
 
 from .models import User
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password, check_password
 from django.http import JsonResponse
+def login(request):
+    if request.method == 'POST':
+        try:
+            data = request.POST
+            phone = data.get('phone')
+            password = data.get('password')
+            
+            if not all([phone, password]):
+                return JsonResponse({'success': False, 'message': '请填写手机号和密码'})
+                
+            user = User.objects.filter(phone_number=phone).first()
+            if not user:
+                return JsonResponse({'success': False, 'message': '用户不存在'})
+                
+            if not check_password(password, user.password):
+                return JsonResponse({'success': False, 'message': '密码错误'})
+                
+            # 手动设置session
+            request.session['user_id'] = user.user_id
+            request.session['is_authenticated'] = True
+            
+            return JsonResponse({
+                'success': True,
+                'message': '登录成功',
+                'user': {
+                    'id': user.user_id,
+                    'name': user.user_name,
+                    'email': user.email
+                }
+            })
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    
+    return JsonResponse({'success': False, 'message': '无效请求方法'})
+
+def check_session(request):
+    if request.method == 'GET':
+        is_authenticated = request.session.get('is_authenticated', False)
+        user_id = request.session.get('user_id')
+        
+        if is_authenticated and user_id:
+            user = User.objects.filter(user_id=user_id).first()
+            if user:
+                return JsonResponse({
+                    'isAuthenticated': True,
+                    'user': {
+                        'id': user.user_id,
+                        'name': user.user_name,
+                        'email': user.email
+                    }
+                })
+        
+        return JsonResponse({'isAuthenticated': False})
+
+def logout(request):
+    # 清除session
+    request.session.flush()
+    return JsonResponse({'success': True, 'message': '登出成功'})
 
 def register(request):
     if request.method == 'POST':
