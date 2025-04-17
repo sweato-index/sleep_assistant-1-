@@ -1,20 +1,33 @@
 $(document).ready(function() {
-    // 兼容Bootstrap 4的模态框显示逻辑
-    $('[data-bs-toggle="modal"]').on('click', function(e) {
-        console.log('Modal button clicked:', this);
-        e.preventDefault();
-        const target = $(this).attr('href');
-        console.log('Target modal:', target);
+    // 全局点击事件监听
+    $(document).on('click', function(e) {
+        console.log('Document click detected on:', e.target);
         
-        // 确保模态框元素存在
-        if ($(target).length) {
-            // 使用jQuery方式初始化并显示模态框
-            $(target).modal({
-                show: true,
-                backdrop: 'static'
-            });
-        } else {
-            console.error('Modal element not found:', target);
+        // 处理模态框按钮点击
+        const $modalBtn = $(e.target).closest('[data-bs-toggle="modal"]');
+        if ($modalBtn.length) {
+            console.group('Modal button click debug');
+            console.log('Modal button found:', $modalBtn[0]);
+            console.log('Button href:', $modalBtn.attr('href'));
+            
+            e.preventDefault();
+            const target = $modalBtn.attr('href');
+            console.log('Modal target:', target);
+            
+            // 检查元素是否可见
+            console.log('Element visible:', $modalBtn.is(':visible'));
+            console.log('Element data:', $modalBtn.data());
+            
+            // 确保模态框元素存在
+            if ($(target).length) {
+                console.log('Showing modal:', target);
+                $(target).modal('show');
+            } else {
+                console.error('Modal element not found:', target);
+            }
+            
+            console.groupEnd();
+            return false;
         }
     });
 
