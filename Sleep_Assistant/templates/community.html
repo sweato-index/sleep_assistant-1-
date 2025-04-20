@@ -126,28 +126,46 @@
                     <div id="forum" class="tab-pane fade show active">
                         <div class="row">
                             <div class="col-md-8">
-                                <div class="forum-categories">
-                                    <h3>讨论主题</h3>
-                                    <div class="category-item">
-                                        <h4>失眠问题</h4>
-                                        <p>讨论失眠原因和解决方案</p>
-                                        <a href="{% url 'forum_topic' %}" class="btn btn-primary">查看话题</a>
+                                <div class="forum-posts-container">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h3>讨论区</h3>
+                                        <button id="newPostBtn" class="btn btn-primary">发表新帖</button>
                                     </div>
-                                    <div class="category-item">
-                                        <h4>睡眠呼吸暂停</h4>
-                                        <p>分享治疗经验和建议</p>
-                                        <a href="{% url 'forum_topic' %}" class="btn btn-primary">查看话题</a>
+                                    
+                                    <!-- 新帖子表单 (默认隐藏) -->
+                                    <div id="newPostForm" class="card mb-4" style="display: none;">
+                                        <div class="card-body">
+                                            <h5 class="card-title">发表新帖</h5>
+                                            <form id="postForm">
+                                                <div class="form-group">
+                                                    <label for="postTitle">标题</label>
+                                                    <input type="text" class="form-control" id="postTitle" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="postContent">内容</label>
+                                                    <textarea class="form-control" id="postContent" rows="5" required></textarea>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary">提交</button>
+                                                <button type="button" id="cancelPostBtn" class="btn btn-secondary ml-2">取消</button>
+                                            </form>
+                                        </div>
                                     </div>
-                                    <!-- 更多主题... -->
+                                    
+                                    <!-- 帖子列表 -->
+                                    <div id="postsList">
+                                        <div class="text-center py-5">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="sr-only">加载中...</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="forum-sidebar">
                                     <h3>热门讨论</h3>
-                                    <ul class="hot-topics">
-                                        <li><a href="#">如何快速入睡？</a></li>
-                                        <li><a href="#">褪黑素使用体验</a></li>
-                                        <li><a href="#">午睡的最佳时长</a></li>
+                                    <ul id="hotTopics" class="hot-topics">
+                                        <!-- 动态加载热门帖子 -->
                                     </ul>
                                 </div>
                             </div>
@@ -396,6 +414,11 @@
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <script src="{% static 'js/popper.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <!-- 基础调试 -->
+    <script>
+        console.log('基础JS已加载');
+        console.log('jQuery版本:', $.fn.jquery);
+    </script>
     <script src="{% static 'js/auth.js' %}"></script>
     <script src="{% static 'js/login-register.js' %}"></script>
     <script src="{% static 'js/jquery.meanmenu.js' %}"></script>
@@ -411,7 +434,14 @@
     <script src="{% static 'js/velocity.ui.min.js' %}"></script>
     <script src="{% static 'js/main.js' %}"></script>
     <script src="{% static 'js/chat-assistant.js' %}"></script>
+    <!-- 社区JS -->
+    <script>
+        console.log('正在加载community.js');
+    </script>
     <script src="{% static 'js/community.js' %}"></script>
+    <script>
+        console.log('community.js已加载');
+    </script>
 
 </body>
 </html>

@@ -168,6 +168,7 @@ class Document(models.Model):
     summary = models.CharField(max_length=30, blank=True, null=True)
     text = models.CharField(max_length=1000, blank=True, null=True)
     image_url = models.CharField(max_length=20, blank=True, null=True)
+    create_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         managed = False

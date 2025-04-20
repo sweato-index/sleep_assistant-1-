@@ -20,7 +20,8 @@ from myapp.views import (
     home, science, tracker, assessment, 
     advice, community, profile, blog_details,
     ai_assistant, forum_topic, get_all_user_ids,
-    register, login, logout, check_session
+    register, login, logout, check_session,
+    forum_posts, create_post, post_detail, add_comment
 )
 
 urlpatterns = [
@@ -40,4 +41,8 @@ urlpatterns = [
     path('api/login/', login, name='login'),
     path('api/logout/', logout, name='logout'),
     path('api/login/check', check_session, name='check_session'),
+    path('api/forum/posts/', forum_posts, name='forum_posts'),
+    path('api/forum/post/create/', create_post, name='create_post'),
+    path('api/forum/post/<str:post_id>/', post_detail, name='post_detail'),
+    path('api/forum/post/<str:post_id>/comment/', add_comment, name='add_comment'),
 ]

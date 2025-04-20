@@ -7,7 +7,148 @@ $(document).ready(function() {
         mirror: false
     });
 
-    // 处理页面加载时的锚点跳转
+    // 检查登录状态
+    function checkLoginStatus() {
+        return $.get('/api/login/check');
+    }
+
+    // 加载帖子列表
+    function loadPosts() {
+        $.get('/api/forum/posts/')
+            .done(function(data) {
+                if(data.posts && data.posts.length > 0) {
+                    renderPosts(data.posts);
+                    loadHotTopics(data.posts.slice(0, 5)); // 取前5条作为热门话题
+                } else {
+                    $('#postsList').html('<div class="alert alert-info">暂无帖子，快来发表第一个吧！</div>');
+                }
+            })
+            .fail(function() {
+                $('#postsList').html('<div class="alert alert-danger">加载帖子失败，请刷新重试</div>');
+            });
+    }
+
+    // 渲染帖子列表
+    function renderPosts(posts) {
+        let html = '';
+        posts.forEach(post => {
+            html += `
+                <div class="card mb-3 post-item" data-id="${post.id}">
+                    <div class="card-body">
+                        <h5 class="card-title">${post.title}</h5>
+                        <p class="card-text">${post.summary}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="fas fa-user"></i> ${post.author} 
+                                <i class="fas fa-clock ml-2"></i> ${post.create_time}
+                                <i class="fas fa-comment ml-2"></i> ${post.comment_count}条评论
+                            </small>
+                            <a href="/forum-topic/?post=${post.id}" class="btn btn-sm btn-outline-primary">查看详情</a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        $('#postsList').html(html);
+    }
+
+    // 加载热门话题
+    function loadHotTopics(posts) {
+        let html = '';
+        posts.forEach(post => {
+            html += `<li><a href="/forum-topic/?post=${post.id}">${post.title}</a></li>`;
+        });
+        $('#hotTopics').html(html);
+    }
+
+    // 新帖子按钮点击事件
+    $('#newPostBtn').click(function() {
+        console.log('发表新帖按钮被点击');
+        checkLoginStatus().done(function(data) {
+            console.log('登录状态检查结果:', data);
+            if(data.isAuthenticated) {
+                console.log('用户已登录，显示表单');
+                $('#newPostForm').slideDown('fast', function() {
+                    console.log('表单显示完成');
+                });
+                $('#newPostBtn').hide();
+            } else {
+                console.log('用户未登录，显示登录模态框');
+                $('#signinModal').modal('show');
+            }
+        }).fail(function(err) {
+            console.error('登录状态检查失败:', err);
+        });
+    });
+
+    // 取消发帖
+    $('#cancelPostBtn').click(function() {
+        $('#postForm')[0].reset();
+        $('#newPostForm').slideUp();
+        $('#newPostBtn').show();
+    });
+
+    // 提交新帖子
+    $('#postForm').submit(function(e) {
+        e.preventDefault();
+        const title = $('#postTitle').val().trim();
+        const content = $('#postContent').val().trim();
+        
+        if(!title || !content) {
+            alert('标题和内容不能为空');
+            return;
+        }
+
+        const submitBtn = $(this).find('button[type="submit"]');
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 提交中...');
+
+        // 获取CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+        
+        $.ajax({
+            url: '/api/forum/post/create/',
+            method: 'POST',
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            data: JSON.stringify({
+                title: title,
+                content: content
+            })
+        }).done(function(data) {
+            if(data.success) {
+                $('#postForm')[0].reset();
+                $('#newPostForm').slideUp();
+                $('#newPostBtn').show();
+                loadPosts(); // 重新加载帖子列表
+            }
+            alert(data.message);
+        }).fail(function() {
+            alert('提交失败，请重试');
+        }).always(function() {
+            submitBtn.prop('disabled', false).text('提交');
+        });
+    });
+
+    // 初始化加载帖子
+    loadPosts();
+
+    // 其他原有功能保持不变
     if(window.location.hash) {
         const target = $(window.location.hash);
         if(target.length) {
@@ -17,70 +158,15 @@ $(document).ready(function() {
         }
     }
 
-    // // 处理导航栏点击事件
-    // $('.dropdown-menu a').click(function(e) {
-    //     const target = $(this).attr('href');
-        
-    //     // 滚动到目标位置
-    //     if(target.startsWith('#')) {
-    //         e.preventDefault();
-    //         $('html, body').animate({
-    //             scrollTop: $(target).offset().top - 100
-    //         }, 800);
-    //     }
-    // });
-
-    // 初始化tab切换
     $('.nav-tabs a').click(function(e) {
         const target = $(this).attr('href');
-        console.log('Tab link clicked:', target);
-        
-        // 只阻止以#开头的链接的默认行为
         if(target && target.startsWith('#')) {
-            console.log('Preventing default for anchor link');
             e.preventDefault();
             $(this).tab('show');
             $('html, body').animate({
                 scrollTop: $(target).offset().top - 100
             }, 800);
         }
-        // 其他链接保持默认行为
-    });
-
-    // 确保AI助手按钮正常工作
-    $('a[href="ai-assistant.html"]').click(function(e) {
-        console.log('AI Assistant link clicked');
-        // 确保不阻止默认行为
-        return true;
-    });
-
-    // 处理表单提交
-    $('form').submit(function(e) {
-        e.preventDefault();
-        const form = $(this);
-        const formType = form.attr('id') || form.find('button[type="submit"]').text();
-        
-        // 显示加载状态
-        const submitBtn = form.find('button[type="submit"]');
-        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 提交中...');
-
-        // 模拟提交
-        setTimeout(() => {
-            submitBtn.prop('disabled', false).text('提交成功');
-            setTimeout(() => {
-                submitBtn.text(submitBtn.data('original-text') || '提交');
-            }, 2000);
-        }, 1500);
-    });
-
-    // 处理加入群组按钮
-    $('.group-item button').click(function() {
-        const btn = $(this);
-        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 加入中...');
-        
-        setTimeout(() => {
-            btn.text('已加入').removeClass('btn-primary').addClass('btn-success');
-        }, 1500);
     });
 
     // 处理挑战进度
@@ -91,102 +177,5 @@ $(document).ready(function() {
             progress.css('width', percent + '%');
         });
     }
-
-    // 初始化
     updateChallengeProgress();
-
-    // 新增论坛功能
-    // 处理评论提交
-    $('.comments-section form').submit(function(e) {
-        e.preventDefault();
-        const textarea = $(this).find('textarea');
-        const comment = textarea.val().trim();
-        
-        if(comment.length === 0) {
-            alert('请输入评论内容');
-            return;
-        }
-
-        const newComment = `
-            <div class="media mb-4">
-                <img src="assets/img/author-1.png" class="mr-3 rounded-circle" width="50" alt="新用户">
-                <div class="media-body">
-                    <h5 class="mt-0">新用户</h5>
-                    <p>${comment}</p>
-                    <small class="text-muted">刚刚</small>
-                    <div class="mt-2">
-                        <a href="#" class="btn btn-sm btn-outline-primary">回复</a>
-                        <a href="#" class="btn btn-sm btn-outline-success ml-2">点赞 (0)</a>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        $('.comment-list').prepend(newComment);
-        textarea.val('');
-    });
-
-    // 处理点赞功能
-    $(document).on('click', '.btn-outline-success', function(e) {
-        e.preventDefault();
-        const btn = $(this);
-        let count = parseInt(btn.text().match(/\d+/)[0]) || 0;
-        count++;
-        btn.text(`点赞 (${count})`);
-    });
-
-    // 处理回复功能
-    $(document).on('click', '.btn-outline-primary', function(e) {
-        e.preventDefault();
-        const comment = $(this).closest('.media');
-        const replyForm = `
-            <div class="media mt-3 ml-5">
-                <div class="media-body">
-                    <form class="reply-form">
-                        <div class="form-group">
-                            <textarea class="form-control" rows="2" placeholder="写下你的回复..."></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-sm btn-primary">提交回复</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary cancel-reply">取消</button>
-                    </form>
-                </div>
-            </div>
-        `;
-        
-        comment.after(replyForm);
-    });
-
-    // 处理取消回复
-    $(document).on('click', '.cancel-reply', function() {
-        $(this).closest('.media').remove();
-    });
-
-    // 处理回复提交
-    $(document).on('submit', '.reply-form', function(e) {
-        e.preventDefault();
-        const textarea = $(this).find('textarea');
-        const reply = textarea.val().trim();
-        
-        if(reply.length === 0) {
-            alert('请输入回复内容');
-            return;
-        }
-
-        const newReply = `
-            <div class="media mt-3 ml-5">
-                <img src="assets/img/author-2.png" class="mr-3 rounded-circle" width="40" alt="回复用户">
-                <div class="media-body">
-                    <h6 class="mt-0">回复用户</h6>
-                    <p>${reply}</p>
-                    <small class="text-muted">刚刚</small>
-                    <div class="mt-2">
-                        <a href="#" class="btn btn-sm btn-outline-primary">回复</a>
-                        <a href="#" class="btn btn-sm btn-outline-success ml-2">点赞 (0)</a>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        $(this).closest('.media').replaceWith(newReply);
-    });
 });
