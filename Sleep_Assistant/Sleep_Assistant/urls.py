@@ -21,7 +21,8 @@ from myapp.views import (
     advice, community, profile, blog_details,
     ai_assistant, forum_topic, get_all_user_ids,
     register, login, logout, check_session,
-    forum_posts, create_post, post_detail, add_comment
+    forum_posts, create_post, post_detail, 
+    add_comment, toggle_like, toggle_favorite
 )
 
 urlpatterns = [
@@ -35,7 +36,7 @@ urlpatterns = [
     path('profile/', profile, name='profile'),
     path('blog-details/', blog_details, name='blog_details'),
     path('ai-assistant/', ai_assistant, name='ai_assistant'),
-    path('forum-topic/', forum_topic, name='forum_topic'),
+    path('forum-topic/<str:post_id>/', forum_topic, name='forum_topic'),
     path('api/user_ids/', get_all_user_ids, name='get_all_user_ids'),
     path('api/register/', register, name='register'),
     path('api/login/', login, name='login'),
@@ -45,4 +46,6 @@ urlpatterns = [
     path('api/forum/post/create/', create_post, name='create_post'),
     path('api/forum/post/<str:post_id>/', post_detail, name='post_detail'),
     path('api/forum/post/<str:post_id>/comment/', add_comment, name='add_comment'),
+    path('api/forum/post/<str:post_id>/like/', toggle_like, name='toggle_like'),
+    path('api/forum/post/<str:post_id>/favorite/', toggle_favorite, name='toggle_favorite'),
 ]

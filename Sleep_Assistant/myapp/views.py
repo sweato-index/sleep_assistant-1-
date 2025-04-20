@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
-from .models import User, Document, DocComment
+from .models import User, Document, DocComment, DocUserAction
 from django.contrib.auth.hashers import make_password, check_password
 import json
 
@@ -74,33 +74,134 @@ def create_post(request):
 @require_http_methods(["GET"])
 def post_detail(request, post_id):
     try:
+        user_id = request.session.get('user_id')
         post = get_object_or_404(Document, doc_id=post_id, doc_type='1')
+        
+        # 确保post_user存在
+        if not hasattr(post, 'post_user'):
+            return JsonResponse({'success': False, 'message': '帖子作者信息缺失'}, status=500)
+            
         comments = DocComment.objects.filter(doc=post).order_by('create_time')
         
-        post_data = {
-            'id': post.doc_id,
-            'title': post.title,
-            'content': post.text,
-            'author': post.post_user.user_name,
-            'create_time': timezone.localtime(post.create_time).strftime('%Y-%m-%d %H:%M'),
-            'comments': [{
-                'id': comment.comment_id,
-                'author': comment.user.user_name,
-                'content': comment.comment,
-                'create_time': timezone.localtime(comment.create_time).strftime('%Y-%m-%d %H:%M')
-            } for comment in comments]
-        }
+        # 获取用户对该帖子的操作状态
+        user_actions = {}
+        if user_id:
+            try:
+                actions = DocUserAction.objects.filter(doc=post, user__user_id=user_id)
+                user_actions = {
+                    'liked': actions.filter(action_type='0').exists(),
+                    'favorited': actions.filter(action_type='1').exists()
+                }
+            except Exception as e:
+                print(f"获取用户操作状态错误: {str(e)}")
+        
+        try:
+            post_data = {
+                'success': True,
+                'title': post.title,
+                'content': post.text,
+                'author': post.post_user.user_name if hasattr(post.post_user, 'user_name') else '未知用户',
+                'create_time': timezone.localtime(post.create_time).strftime('%Y-%m-%d %H:%M') if post.create_time else '未知时间',
+                'like_count': DocUserAction.objects.filter(doc=post, action_type='0').count(),
+                'favorite_count': DocUserAction.objects.filter(doc=post, action_type='1').count(),
+                'user_actions': user_actions or {},
+                'comments': [{
+                    'id': comment.comment_id,
+                    'author': comment.user.user_name if hasattr(comment.user, 'user_name') else '未知用户',
+                    'content': comment.comment,
+                    'create_time': timezone.localtime(comment.create_time).strftime('%Y-%m-%d %H:%M') if comment.create_time else '未知时间',
+                    'reply_count': DocComment.objects.filter(parent=comment).count()
+                } for comment in comments]
+            }
+            return JsonResponse(post_data)
+        except Exception as e:
+            print(f"构建响应数据错误: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': '获取帖子详情失败',
+                'error': str(e)
+            }, status=500)
         return JsonResponse(post_data)
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
-# 添加评论
+# 评论和互动功能
+@require_http_methods(["POST"])
+def toggle_like(request, post_id):
+    try:
+        user_id = request.session.get('user_id')
+        if not user_id:
+            return JsonResponse({'success': False, 'message': '请先登录'}, status=401)
+            
+        post = get_object_or_404(Document, doc_id=post_id)
+        user = get_object_or_404(User, user_id=user_id)
+        
+        # 生成新action_id
+        last_action = DocUserAction.objects.order_by('-action_id').first()
+        new_id = str(int(last_action.action_id) + 1).zfill(10) if last_action else '1000000000'
+        
+        action, created = DocUserAction.objects.update_or_create(
+            action_id=new_id,
+            doc=post,
+            user=user,
+            action_type='0',  # 0=点赞
+            defaults={'create_time': timezone.now()}
+        )
+        
+        if not created:
+            action.delete()
+            
+        return JsonResponse({
+            'success': True,
+            'liked': created,
+            'like_count': DocUserAction.objects.filter(doc=post, action_type='0').count()
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+@require_http_methods(["POST"])        
+def toggle_favorite(request, post_id):
+    try:
+        user_id = request.session.get('user_id')
+        if not user_id:
+            return JsonResponse({'success': False, 'message': '请先登录'}, status=401)
+            
+        post = get_object_or_404(Document, doc_id=post_id)
+        user = get_object_or_404(User, user_id=user_id)
+        
+        # 生成新action_id
+        last_action = DocUserAction.objects.order_by('-action_id').first()
+        new_id = str(int(last_action.action_id) + 1).zfill(10) if last_action else '1000000000'
+        
+        action, created = DocUserAction.objects.update_or_create(
+            action_id=new_id,
+            doc=post,
+            user=user,
+            action_type='1',  # 1=收藏
+            defaults={'create_time': timezone.now()}
+        )
+        
+        if not created:
+            action.delete()
+            
+        return JsonResponse({
+            'success': True,
+            'favorited': created,
+            'favorite_count': DocUserAction.objects.filter(doc=post, action_type='1').count()
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
 @require_http_methods(["POST"])
 def add_comment(request, post_id):
     try:
+        print(f"收到评论请求，post_id: {post_id}")  # 调试日志
         data = json.loads(request.body)
+        print(f"请求数据: {data}")  # 调试日志
+        
         user_id = request.session.get('user_id')
         if not user_id:
+            print("用户未登录")  # 调试日志
             return JsonResponse({'success': False, 'message': '请先登录'}, status=401)
             
         user = get_object_or_404(User, user_id=user_id)
@@ -108,18 +209,34 @@ def add_comment(request, post_id):
         content = data.get('content')
         
         if not content:
+            print("评论内容为空")  # 调试日志
             return JsonResponse({'success': False, 'message': '评论内容不能为空'}, status=400)
             
         # 生成新comment_id
         last_comment = DocComment.objects.order_by('-comment_id').first()
         new_id = str(int(last_comment.comment_id) + 1).zfill(10) if last_comment else '1000000000'
+        print(f"生成comment_id: {new_id}")  # 调试日志
         
-        comment = DocComment.objects.create(
-            comment_id=new_id,
-            doc=post,
-            user=user,
-            comment=content
-        )
+        # 创建评论
+        try:
+            comment = DocComment.objects.create(
+                comment_id=new_id,
+                doc=post,
+                user=user,
+                comment=content,
+                create_time=timezone.now(),
+                status='1',
+                parent=None
+            )
+            print(f"评论创建成功: {comment.comment_id}")  # 调试日志
+            
+        except Exception as e:
+            print(f"创建评论失败: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': '评论创建失败',
+                'error': str(e)
+            }, status=500)
         
         return JsonResponse({
             'success': True,
@@ -162,8 +279,8 @@ def blog_details(request):
 def ai_assistant(request):
     return render(request, "ai-assistant.html")
 
-def forum_topic(request):
-    return render(request, "forum-topic.html")
+def forum_topic(request, post_id):
+    return render(request, "forum-topic.html", {'post_id': post_id})
 
 # 用户认证相关视图保持不变
 def login(request):

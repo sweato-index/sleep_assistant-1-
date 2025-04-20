@@ -120,7 +120,7 @@ class DjangoMigrations(models.Model):
     applied = models.DateTimeField()
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'django_migrations'
 
 
@@ -144,7 +144,7 @@ class DocComment(models.Model):
     status = models.CharField(max_length=2, blank=True, null=True)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'doc_comment'
 
 
@@ -156,7 +156,7 @@ class DocUserAction(models.Model):
     create_time = models.DateTimeField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'doc_user_action'
 
 
@@ -171,7 +171,7 @@ class Document(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'document'
 
 

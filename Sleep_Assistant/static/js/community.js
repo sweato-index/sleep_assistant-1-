@@ -43,7 +43,7 @@ $(document).ready(function() {
                                 <i class="fas fa-clock ml-2"></i> ${post.create_time}
                                 <i class="fas fa-comment ml-2"></i> ${post.comment_count}条评论
                             </small>
-                            <a href="/forum-topic/?post=${post.id}" class="btn btn-sm btn-outline-primary">查看详情</a>
+                            <a href="/forum-topic/${post.id}" class="btn btn-sm btn-outline-primary">查看详情</a>
                         </div>
                     </div>
                 </div>
