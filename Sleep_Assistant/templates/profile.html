@@ -110,9 +110,10 @@
                                   <img src="{% static 'img/author-1.png' %}" alt="用户头像">
                               </div>
                               <ul class="dropdown-menu">
-                                  <li><a href="#signinModal" data-bs-toggle="modal">登录</a></li>
-                                  <li><a href="#signupModal" data-bs-toggle="modal">注册</a></li>
-                                  <li><a href="{% url 'profile' %}">用户中心</a></li>
+                                  <li><a class="dropdown-item" href="#signinModal" data-bs-toggle="modal">登录</a></li>
+                                  <li><a class="dropdown-item" href="#signupModal" data-bs-toggle="modal">注册</a></li>
+                                  <li><hr class="dropdown-divider"></li>
+                                  <li><a class="dropdown-item" href="{% url 'profile' %}">用户中心</a></li>
                               </ul>
                           </div>
                   </div>
