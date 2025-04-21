@@ -22,7 +22,8 @@ from myapp.views import (
     ai_assistant, forum_topic, get_all_user_ids,
     register, login, logout, check_session,
     forum_posts, create_post, post_detail, 
-    add_comment, toggle_like, toggle_favorite
+    add_comment, toggle_like, toggle_favorite,
+    save_ai_qa
 )
 
 urlpatterns = [
@@ -48,4 +49,5 @@ urlpatterns = [
     path('api/forum/post/<str:post_id>/comment/', add_comment, name='add_comment'),
     path('api/forum/post/<str:post_id>/like/', toggle_like, name='toggle_like'),
     path('api/forum/post/<str:post_id>/favorite/', toggle_favorite, name='toggle_favorite'),
+    path('api/ai/qa/', save_ai_qa, name='save_ai_qa'),
 ]

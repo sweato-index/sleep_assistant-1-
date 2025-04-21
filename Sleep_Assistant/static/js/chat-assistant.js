@@ -133,9 +133,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const decoder = new TextDecoder();
             let assistantMessage = '';
 
-            // Create message container
+            // Create message container with pre element for formatting
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message', 'assistant-message');
+            const contentPre = document.createElement('pre');
+            contentPre.style.whiteSpace = 'pre-wrap';
+            contentPre.style.wordWrap = 'break-word';
+            contentPre.style.margin = '0';
+            contentPre.style.fontFamily = 'inherit';
+            messageDiv.appendChild(contentPre);
             chatBody.appendChild(messageDiv);
 
             while (true) {
@@ -145,6 +151,29 @@ document.addEventListener('DOMContentLoaded', function() {
                     stopBtn.disabled = true;
                     // Add final message to history
                     conversationHistory.push({role: "assistant", content: assistantMessage});
+                    
+                    // Save conversation to database
+                    try {
+                        const response = await fetch('/api/ai/qa/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            body: JSON.stringify({
+                                question: message,
+                                answer: assistantMessage
+                            })
+                        });
+                        
+                        const result = await response.json();
+                        if (!response.ok || !result.success) {
+                            console.error('Failed to save conversation:', result.message);
+                        }
+                    } catch (error) {
+                        console.error('Error saving conversation:', error);
+                    }
+                    
                     break;
                 }
 
@@ -161,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             const content = json.choices[0].delta.content;
                             if (content) {
                                 assistantMessage += content;
-                                messageDiv.textContent = assistantMessage;
+                                contentPre.textContent = assistantMessage;
                                 chatBody.scrollTop = chatBody.scrollHeight;
                             }
                         } catch (error) {
@@ -180,14 +209,42 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function addMessage(sender, text) {
-        const messageDiv = document.createElement('div');
-        messageDiv.classList.add('message');
-        messageDiv.classList.add(sender === 'user' ? 'user-message' : 'assistant-message');
-        messageDiv.textContent = text;
-        chatBody.appendChild(messageDiv);
-        chatBody.scrollTop = chatBody.scrollHeight;
+// Get CSRF token from cookies
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
     }
+    return cookieValue;
+}
+
+function addMessage(sender, text) {
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message');
+    messageDiv.classList.add(sender === 'user' ? 'user-message' : 'assistant-message');
+    
+    // Create a pre element to preserve all formatting
+    const contentPre = document.createElement('pre');
+    contentPre.style.whiteSpace = 'pre-wrap';
+    contentPre.style.wordWrap = 'break-word';
+    contentPre.style.margin = '0';
+    contentPre.style.fontFamily = 'inherit';
+    
+    // Escape HTML and preserve formatting
+    const formattedText = document.createTextNode(text);
+    contentPre.appendChild(formattedText);
+    
+    messageDiv.appendChild(contentPre);
+    chatBody.appendChild(messageDiv);
+    chatBody.scrollTop = chatBody.scrollHeight;
+}
 
     function getWelcomeMessage(role) {
         switch(role) {

@@ -48,26 +48,93 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 const commentList = document.getElementById('comment-list');
                 commentList.innerHTML = '';
-
-                data.comments.forEach(comment => {
-                    const commentElement = document.createElement('div');
-                    commentElement.className = 'media mb-4';
-                    commentElement.innerHTML = `
-                        <img src="/static/img/author-2.png" class="mr-3 rounded-circle" width="50" alt="${comment.author}">
-                        <div class="media-body">
-                            <h5 class="mt-0">${comment.author}</h5>
-                            <p>${comment.content}</p>
-                            <small class="text-muted">${comment.create_time}</small>
-                            <div class="mt-2">
-                                <a href="#" class="btn btn-sm btn-outline-primary">回复</a>
-                                <span class="ml-2">${comment.reply_count} 条回复</span>
-                            </div>
-                        </div>
-                    `;
-                    commentList.appendChild(commentElement);
-                });
+                renderComments(data.comments, commentList, 0);
             });
     }
+
+    // 递归渲染评论和回复
+    function renderComments(comments, container, level) {
+        comments.forEach(comment => {
+            const commentElement = document.createElement('div');
+            commentElement.className = 'media mb-4';
+            commentElement.style.marginLeft = `${level * 40}px`;
+            commentElement.dataset.commentId = comment.id;
+            
+            commentElement.innerHTML = `
+                <img src="/static/img/author-2.png" class="mr-3 rounded-circle" width="50" alt="${comment.author}">
+                <div class="media-body">
+                    <h5 class="mt-0">${comment.author}</h5>
+                    <p>${comment.content}</p>
+                    <small class="text-muted">${comment.create_time}</small>
+                    <div class="mt-2">
+                        <a href="#" class="btn btn-sm btn-outline-primary reply-btn">回复</a>
+                        <span class="ml-2">${comment.reply_count} 条回复</span>
+                    </div>
+                    <div class="reply-form mt-3" style="display: none;">
+                        <textarea class="form-control mb-2 reply-text" rows="2" placeholder="写下你的回复..."></textarea>
+                        <button class="btn btn-sm btn-primary submit-reply">提交回复</button>
+                        <button class="btn btn-sm btn-outline-secondary ml-2 cancel-reply">取消</button>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(commentElement);
+            
+            // 如果有回复，递归渲染
+            if (comment.replies && comment.replies.length > 0) {
+                renderComments(comment.replies, container, level + 1);
+            }
+        });
+    }
+
+    // 处理回复按钮点击
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('reply-btn')) {
+            e.preventDefault();
+            const commentElement = e.target.closest('.media');
+            const replyForm = commentElement.querySelector('.reply-form');
+            replyForm.style.display = 'block';
+        }
+        
+        if (e.target.classList.contains('cancel-reply')) {
+            e.preventDefault();
+            const replyForm = e.target.closest('.reply-form');
+            replyForm.style.display = 'none';
+            replyForm.querySelector('.reply-text').value = '';
+        }
+        
+        if (e.target.classList.contains('submit-reply')) {
+            e.preventDefault();
+            const replyForm = e.target.closest('.reply-form');
+            const content = replyForm.querySelector('.reply-text').value.trim();
+            const parentId = replyForm.closest('.media').dataset.commentId;
+            
+            if (!content) {
+                alert('回复内容不能为空');
+                return;
+            }
+            
+            fetch(`/api/forum/post/${postId}/comment/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({ 
+                    content: content,
+                    parent_id: parentId 
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    replyForm.style.display = 'none';
+                    replyForm.querySelector('.reply-text').value = '';
+                    loadComments();
+                }
+            });
+        }
+    });
 
     // 点赞功能
     document.getElementById('like-btn').addEventListener('click', function() {
@@ -121,7 +188,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': csrftoken
             },
-            body: JSON.stringify({ content: content })
+            body: JSON.stringify({ 
+                content: content,
+                parent_id: null 
+            })
         })
         .then(response => response.json())
         .then(data => {
