@@ -10,7 +10,7 @@ from django.db import models
 
 class AiQa(models.Model):
     qa_id = models.CharField(primary_key=True, max_length=10)
-    user = models.ForeignKey('User', models.DO_NOTHING)
+    user = models.ForeignKey('User', models.DO_NOTHING, null=True)
     qa_content = models.CharField(max_length=1000)
     create_time = models.DateTimeField()
     answers = models.CharField(max_length=2000, blank=True, null=True)
@@ -136,8 +136,8 @@ class DjangoSession(models.Model):
 
 class DocComment(models.Model):
     comment_id = models.CharField(primary_key=True, max_length=10)
-    doc = models.ForeignKey('Document', models.DO_NOTHING)
-    user = models.ForeignKey('User', models.DO_NOTHING)
+    doc = models.ForeignKey('Document', models.DO_NOTHING, null=True)
+    user = models.ForeignKey('User', models.DO_NOTHING, null=True)
     parent = models.ForeignKey('self', models.DO_NOTHING, blank=True, null=True)
     comment = models.CharField(max_length=50)
     create_time = models.DateTimeField()
@@ -150,8 +150,8 @@ class DocComment(models.Model):
 
 class DocUserAction(models.Model):
     action_id = models.CharField(primary_key=True, max_length=10)
-    doc = models.ForeignKey('Document', models.DO_NOTHING)
-    user = models.ForeignKey('User', models.DO_NOTHING)
+    doc = models.ForeignKey('Document', models.DO_NOTHING, null=True)
+    user = models.ForeignKey('User', models.DO_NOTHING, null=True)
     action_type = models.CharField(max_length=2)
     create_time = models.DateTimeField(blank=True, null=True)
 
@@ -163,12 +163,12 @@ class DocUserAction(models.Model):
 class Document(models.Model):
     doc_id = models.CharField(primary_key=True, max_length=10)
     doc_type = models.CharField(max_length=2)
-    post_user = models.ForeignKey('User', models.DO_NOTHING)
+    post_user = models.ForeignKey('User', models.DO_NOTHING, null=True)
     title = models.CharField(max_length=20)
     summary = models.CharField(max_length=30, blank=True, null=True)
     text = models.CharField(max_length=1000, blank=True, null=True)
     image_url = models.CharField(max_length=20, blank=True, null=True)
-    create_time = models.DateTimeField(auto_now_add=True)
+    create_time = models.DateTimeField(auto_now_add=True, null=True)
 
     class Meta:
         managed = True
@@ -178,7 +178,7 @@ class Document(models.Model):
 class SleepChallenge(models.Model):
     challenge_id = models.CharField(primary_key=True, max_length=10)
     challenge_title = models.CharField(max_length=20)
-    initiator = models.ForeignKey('User', models.DO_NOTHING)
+    initiator = models.ForeignKey('User', models.DO_NOTHING, null=True)
     create_time = models.DateTimeField()
     status = models.CharField(max_length=2, blank=True, null=True)
 
@@ -189,7 +189,7 @@ class SleepChallenge(models.Model):
 
 class SleepRecord(models.Model):
     record_id = models.CharField(primary_key=True, max_length=15)
-    user = models.ForeignKey('User', models.DO_NOTHING)
+    user = models.ForeignKey('User', models.DO_NOTHING, null=True)
     record_time = models.DateTimeField()
     sleep_time = models.DateTimeField()
     wake_time = models.DateTimeField()
@@ -222,11 +222,48 @@ class User(models.Model):
 
 class UserChallenge(models.Model):
     id = models.CharField(primary_key=True, max_length=10)
-    user = models.ForeignKey(User, models.DO_NOTHING)
-    challenge = models.ForeignKey(SleepChallenge, models.DO_NOTHING)
+    user = models.ForeignKey(User, models.DO_NOTHING, null=True)
+    challenge = models.ForeignKey(SleepChallenge, models.DO_NOTHING, null=True)
     update_date = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=2, blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'user_challenge'
+
+class SleepGroup(models.Model):
+    group_id = models.CharField(primary_key=True, max_length=10)
+    group_name = models.CharField(max_length=50)
+    owner = models.ForeignKey('User', models.DO_NOTHING)
+    description = models.CharField(max_length=200, blank=True, null=True)
+    create_time = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=2, default='1')  # 1-active, 0-inactive
+    avatar = models.CharField(max_length=100, blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'sleep_group'
+
+class UserGroup(models.Model):
+    id = models.AutoField(primary_key=True)
+    group = models.ForeignKey('SleepGroup', models.DO_NOTHING)
+    member = models.ForeignKey('User', models.DO_NOTHING)
+    join_time = models.DateTimeField(auto_now_add=True)
+    role = models.CharField(max_length=2, default='0')  # 0-member, 1-admin
+
+    class Meta:
+        managed = True
+        db_table = 'user_group'
+        unique_together = (('group', 'member'),)
+
+class ChatHistory(models.Model):
+    id = models.AutoField(primary_key=True)
+    group = models.ForeignKey('SleepGroup', models.DO_NOTHING)
+    member = models.ForeignKey('User', models.DO_NOTHING)
+    content = models.TextField()
+    msg_type = models.CharField(max_length=2, default='0')  # 0-text, 1-image, 2-link
+    create_time = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        managed = True
+        db_table = 'chat_history'

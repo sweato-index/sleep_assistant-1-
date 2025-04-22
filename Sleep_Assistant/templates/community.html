@@ -175,35 +175,71 @@
                     <!-- 群组 -->
                     <div id="groups" class="tab-pane fade">
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="group-list">
-                                    <h3>推荐群组</h3>
-                                    <div class="group-item">
-                                        <h4>早起者联盟</h4>
-                                        <p>帮助养成早起习惯</p>
-                                        <button class="btn btn-primary">加入群组</button>
+                            <div class="col-md-8">
+                                <div class="groups-container">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h3>我的群组</h3>
+                                        <button id="newGroupBtn" class="btn btn-primary">创建新群组</button>
                                     </div>
-                                    <div class="group-item">
-                                        <h4>冥想助眠小组</h4>
-                                        <p>分享冥想技巧和经验</p>
-                                        <button class="btn btn-primary">加入群组</button>
+                                    
+                                    <!-- 新群组表单 (默认隐藏) -->
+                                    <div id="newGroupForm" class="card mb-4" style="display: none;">
+                                        <div class="card-body">
+                                            <h5 class="card-title">创建新群组</h5>
+                                            <form id="groupForm">
+                                                <div class="form-group">
+                                                    <label for="groupName">群组名称</label>
+                                                    <input type="text" class="form-control" id="groupName" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="groupDesc">群组描述</label>
+                                                    <textarea class="form-control" id="groupDesc" rows="3" required></textarea>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary">创建</button>
+                                                <button type="button" id="cancelGroupBtn" class="btn btn-secondary ml-2">取消</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 群组列表 -->
+                                    <div id="groupsList">
+                                        <div class="text-center py-5">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="sr-only">加载中...</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="create-group">
-                                    <h3>创建新群组</h3>
-                                    <form>
-                                        <div class="form-group">
-                                            <label>群组名称</label>
-                                            <input type="text" class="form-control">
+                            <div class="col-md-4">
+                                <div class="group-chat-container" id="groupChatContainer" style="display: none; width: 100%;">
+                                    <div class="card h-100">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 id="chatGroupName">群组聊天室</h5>
+                                            <button id="leaveGroupBtn" class="btn btn-sm btn-danger">退出群组</button>
                                         </div>
-                                        <div class="form-group">
-                                            <label>群组描述</label>
-                                            <textarea class="form-control" rows="3"></textarea>
+                                        <div class="card-body d-flex flex-column p-0">
+                                            <div id="chatMessages" class="chat-messages flex-grow-1 p-3" style="overflow-y: auto; max-height: 400px;">
+                                                <!-- 聊天消息将在这里动态加载 -->
+                                            </div>
+                                            <div class="chat-input p-3 border-top">
+                                                <form id="sendMessageForm">
+                                                    <div class="input-group">
+                                                        <input type="text" id="messageInput" class="form-control" placeholder="输入消息...">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-primary" type="submit">发送</button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
                                         </div>
-                                        <button type="submit" class="btn btn-primary">创建群组</button>
-                                    </form>
+                                    </div>
+                                </div>
+                                <div class="group-info" id="groupInfoSidebar">
+                                    <h3>推荐群组</h3>
+                                    <div id="recommendedGroups">
+                                        <!-- 推荐群组将在这里动态加载 -->
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -441,6 +477,15 @@
     <script src="{% static 'js/community.js' %}"></script>
     <script>
         console.log('community.js已加载');
+    </script>
+    
+    <!-- 群组JS -->
+    <script>
+        console.log('正在加载group.js');
+    </script>
+    <script src="{% static 'js/group.js' %}"></script>
+    <script>
+        console.log('group.js已加载');
     </script>
 
 </body>

@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
-from .models import User, Document, DocComment, DocUserAction,AiQa
+from .models import User, Document, DocComment, DocUserAction, AiQa, SleepGroup, UserGroup, ChatHistory
 from django.db import transaction
 from django.contrib.auth.hashers import make_password, check_password
 import json
@@ -273,6 +273,219 @@ def add_comment(request, post_id):
                 'parent_id': parent_id if parent_id else None,
                 'reply_count': 0
             }
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+# 群组功能视图
+@require_http_methods(["POST"])
+def create_group(request):
+    try:
+        data = json.loads(request.body)
+        user_id = request.session.get('user_id')
+        if not user_id:
+            return JsonResponse({'success': False, 'message': '请先登录'}, status=401)
+            
+        user = get_object_or_404(User, user_id=user_id)
+        group_name = data.get('group_name')
+        description = data.get('description', '')
+        
+        if not group_name:
+            return JsonResponse({'success': False, 'message': '群组名称不能为空'}, status=400)
+            
+        # 生成新group_id
+        last_group = SleepGroup.objects.order_by('-group_id').first()
+        new_id = str(int(last_group.group_id) + 1).zfill(10) if last_group else '1000000000'
+        
+        group = SleepGroup.objects.create(
+            group_id=new_id,
+            group_name=group_name,
+            owner=user,
+            description=description
+        )
+        
+        # 自动将创建者加入群组
+        UserGroup.objects.create(
+            group=group,
+            member=user,
+            role='1'  # 管理员
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': '群组创建成功',
+            'group_id': group.group_id
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+@require_http_methods(["GET"])
+def get_groups(request):
+    try:
+        user_id = request.session.get('user_id')
+        if not user_id:
+            return JsonResponse({'success': False, 'message': '请先登录'}, status=401)
+            
+        # 获取用户加入的群组
+        user_groups = UserGroup.objects.filter(member__user_id=user_id).select_related('group')
+        groups_data = []
+        for ug in user_groups:
+            group = ug.group
+            groups_data.append({
+                'group_id': group.group_id,
+                'group_name': group.group_name,
+                'description': group.description,
+                'member_count': UserGroup.objects.filter(group=group).count(),
+                'role': ug.role,
+                'create_time': group.create_time.strftime('%Y-%m-%d %H:%M')
+            })
+            
+        # 获取公开群组(用户未加入的)
+        all_groups = SleepGroup.objects.filter(status='1').exclude(
+            group_id__in=[g.group.group_id for g in user_groups]
+        )
+        for group in all_groups:
+            groups_data.append({
+                'group_id': group.group_id,
+                'group_name': group.group_name,
+                'description': group.description,
+                'member_count': UserGroup.objects.filter(group=group).count(),
+                'role': None,  # 未加入
+                'create_time': group.create_time.strftime('%Y-%m-%d %H:%M')
+            })
+            
+        return JsonResponse({
+            'success': True,
+            'groups': groups_data
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+@require_http_methods(["POST"])
+def join_group(request, group_id):
+    try:
+        user_id = request.session.get('user_id')
+        if not user_id:
+            return JsonResponse({'success': False, 'message': '请先登录'}, status=401)
+            
+        user = get_object_or_404(User, user_id=user_id)
+        group = get_object_or_404(SleepGroup, group_id=group_id)
+        
+        # 检查是否已加入
+        if UserGroup.objects.filter(group=group, member=user).exists():
+            return JsonResponse({'success': False, 'message': '您已加入该群组'}, status=400)
+            
+        UserGroup.objects.create(
+            group=group,
+            member=user,
+            role='0'  # 普通成员
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': '加入群组成功'
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+@require_http_methods(["POST"])
+def leave_group(request, group_id):
+    try:
+        user_id = request.session.get('user_id')
+        if not user_id:
+            return JsonResponse({'success': False, 'message': '请先登录'}, status=401)
+            
+        user = get_object_or_404(User, user_id=user_id)
+        group = get_object_or_404(SleepGroup, group_id=group_id)
+        
+        # 检查是否是群主
+        if group.owner.user_id == user_id:
+            return JsonResponse({'success': False, 'message': '群主不能退出群组'}, status=400)
+            
+        UserGroup.objects.filter(group=group, member=user).delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': '退出群组成功'
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+@require_http_methods(["GET"])
+def get_group_chat(request, group_id):
+    try:
+        user_id = request.session.get('user_id')
+        if not user_id:
+            return JsonResponse({'success': False, 'message': '请先登录'}, status=401)
+            
+        # 检查用户是否在群组中
+        if not UserGroup.objects.filter(group__group_id=group_id, member__user_id=user_id).exists():
+            return JsonResponse({'success': False, 'message': '您不在该群组中'}, status=403)
+            
+        # 获取群组信息
+        group = get_object_or_404(SleepGroup, group_id=group_id)
+        members = UserGroup.objects.filter(group=group).select_related('member')
+        
+        # 获取聊天记录(最近100条)
+        messages = ChatHistory.objects.filter(group=group).order_by('-create_time')[:100]
+        
+        return JsonResponse({
+            'success': True,
+            'group': {
+                'group_id': group.group_id,
+                'group_name': group.group_name,
+                'description': group.description,
+                'owner': group.owner.user_name
+            },
+            'members': [{
+                'user_id': m.member.user_id,
+                'user_name': m.member.user_name,
+                'role': m.role
+            } for m in members],
+            'messages': [{
+                'id': msg.id,
+                'user_id': msg.member.user_id,
+                'user_name': msg.member.user_name,
+                'content': msg.content,
+                'msg_type': msg.msg_type,
+                'create_time': msg.create_time.strftime('%Y-%m-%d %H:%M')
+            } for msg in messages]
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+@require_http_methods(["POST"])
+def send_group_message(request, group_id):
+    try:
+        data = json.loads(request.body)
+        user_id = request.session.get('user_id')
+        if not user_id:
+            return JsonResponse({'success': False, 'message': '请先登录'}, status=401)
+            
+        # 检查用户是否在群组中
+        if not UserGroup.objects.filter(group__group_id=group_id, member__user_id=user_id).exists():
+            return JsonResponse({'success': False, 'message': '您不在该群组中'}, status=403)
+            
+        user = get_object_or_404(User, user_id=user_id)
+        group = get_object_or_404(SleepGroup, group_id=group_id)
+        content = data.get('content')
+        msg_type = data.get('msg_type', '0')
+        
+        if not content:
+            return JsonResponse({'success': False, 'message': '消息内容不能为空'}, status=400)
+            
+        # 创建消息记录
+        message = ChatHistory.objects.create(
+            group=group,
+            member=user,
+            content=content,
+            msg_type=msg_type
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': '消息发送成功',
+            'message_id': message.id
         })
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)}, status=500)

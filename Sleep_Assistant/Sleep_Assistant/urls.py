@@ -23,7 +23,9 @@ from myapp.views import (
     register, login, logout, check_session,
     forum_posts, create_post, post_detail, 
     add_comment, toggle_like, toggle_favorite,
-    save_ai_qa
+    save_ai_qa, create_group, get_groups,
+    join_group, leave_group, get_group_chat,
+    send_group_message
 )
 
 urlpatterns = [
@@ -50,4 +52,11 @@ urlpatterns = [
     path('api/forum/post/<str:post_id>/like/', toggle_like, name='toggle_like'),
     path('api/forum/post/<str:post_id>/favorite/', toggle_favorite, name='toggle_favorite'),
     path('api/ai/qa/', save_ai_qa, name='save_ai_qa'),
+    # 群组功能路由
+    path('api/group/create/', create_group, name='create_group'),
+    path('api/groups/', get_groups, name='get_groups'),
+    path('api/group/<str:group_id>/join/', join_group, name='join_group'),
+    path('api/group/<str:group_id>/leave/', leave_group, name='leave_group'),
+    path('api/group/<str:group_id>/chat/', get_group_chat, name='get_group_chat'),
+    path('api/group/<str:group_id>/message/', send_group_message, name='send_group_message'),
 ]
