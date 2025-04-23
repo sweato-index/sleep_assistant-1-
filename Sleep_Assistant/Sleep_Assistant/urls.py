@@ -27,6 +27,11 @@ from myapp.views import (
     join_group, leave_group, get_group_chat,
     send_group_message
 )
+from myapp.sleep_challenge_views import (
+    get_challenges, create_challenge,
+    join_challenge, leave_challenge,
+    checkin_challenge, get_challenge_progress
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -59,4 +64,11 @@ urlpatterns = [
     path('api/group/<str:group_id>/leave/', leave_group, name='leave_group'),
     path('api/group/<str:group_id>/chat/', get_group_chat, name='get_group_chat'),
     path('api/group/<str:group_id>/message/', send_group_message, name='send_group_message'),
+    # 睡眠挑战功能路由
+    path('api/challenges/', get_challenges, name='get_challenges'),
+    path('api/challenge/create/', create_challenge, name='create_challenge'),
+    path('api/challenge/<str:challenge_id>/join/', join_challenge, name='join_challenge'),
+    path('api/challenge/<str:challenge_id>/leave/', leave_challenge, name='leave_challenge'),
+    path('api/challenge/<str:challenge_id>/checkin/', checkin_challenge, name='checkin_challenge'),
+    path('api/challenge/<str:challenge_id>/progress/', get_challenge_progress, name='get_challenge_progress'),
 ]

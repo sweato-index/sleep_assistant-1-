@@ -6,6 +6,7 @@
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
+from django.core.exceptions import ValidationError
 
 
 class AiQa(models.Model):
@@ -174,17 +175,26 @@ class Document(models.Model):
         managed = True
         db_table = 'document'
 
-
 class SleepChallenge(models.Model):
-    challenge_id = models.CharField(primary_key=True, max_length=10)
-    challenge_title = models.CharField(max_length=20)
-    initiator = models.ForeignKey('User', models.DO_NOTHING, null=True)
-    create_time = models.DateTimeField()
-    status = models.CharField(max_length=2, blank=True, null=True)
+    challenge_id = models.CharField(primary_key=True, max_length=10, default='1000000000')
+    challenge_title = models.CharField(max_length=50)
+    initiator = models.ForeignKey('User', models.DO_NOTHING)
+    create_time = models.DateTimeField(auto_now_add=True)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    description = models.TextField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'sleep_challenge'
+
+    def __str__(self):
+        return self.challenge_title
+
+    def clean(self):
+        if self.start_date > self.end_date:
+            raise ValidationError("结束日期不能早于开始日期")
 
 
 class SleepRecord(models.Model):
@@ -221,15 +231,32 @@ class User(models.Model):
 
 
 class UserChallenge(models.Model):
-    id = models.CharField(primary_key=True, max_length=10)
-    user = models.ForeignKey(User, models.DO_NOTHING, null=True)
-    challenge = models.ForeignKey(SleepChallenge, models.DO_NOTHING, null=True)
-    update_date = models.DateTimeField(blank=True, null=True)
-    status = models.CharField(max_length=2, blank=True, null=True)
+    id = models.CharField(primary_key=True, max_length=20, default='1000000000')
+    user = models.ForeignKey(User, models.DO_NOTHING)
+    challenge = models.ForeignKey(SleepChallenge, models.DO_NOTHING)
+    join_time = models.DateTimeField(auto_now_add=True)
+    completed_days = models.IntegerField(default=0)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'user_challenge'
+        unique_together = (('user', 'challenge'),)
+
+class ChallengeCheckIn(models.Model):
+    id = models.BigAutoField(primary_key=True, auto_created=True, default=1000000000)
+    user_challenge = models.ForeignKey(UserChallenge, models.DO_NOTHING)
+    checkin_date = models.DateField()
+    notes = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'challenge_checkin'
+        unique_together = (('user_challenge', 'checkin_date'),)
+
+    def clean(self):
+        challenge = self.user_challenge.challenge
+        if self.checkin_date < challenge.start_date or self.checkin_date > challenge.end_date:
+            raise ValidationError("打卡日期必须在挑战有效期内")
 
 class SleepGroup(models.Model):
     group_id = models.CharField(primary_key=True, max_length=10)
