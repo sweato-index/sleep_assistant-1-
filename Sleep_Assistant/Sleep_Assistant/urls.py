@@ -30,7 +30,8 @@ from myapp.views import (
 from myapp.sleep_challenge_views import (
     get_challenges, create_challenge,
     join_challenge, leave_challenge,
-    checkin_challenge, get_challenge_progress
+    checkin_challenge, get_challenge_progress,
+    get_user_challenges
 )
 
 urlpatterns = [
@@ -70,5 +71,6 @@ urlpatterns = [
     path('api/challenge/<str:challenge_id>/join/', join_challenge, name='join_challenge'),
     path('api/challenge/<str:challenge_id>/leave/', leave_challenge, name='leave_challenge'),
     path('api/challenge/<str:challenge_id>/checkin/', checkin_challenge, name='checkin_challenge'),
+    path('api/challenge/user/', get_user_challenges, name='get_user_challenges'),
     path('api/challenge/<str:challenge_id>/progress/', get_challenge_progress, name='get_challenge_progress'),
 ]

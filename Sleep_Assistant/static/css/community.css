@@ -226,12 +226,96 @@ h1::after {
     margin-bottom: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
 }
 
+.challenge-list .challenge-item.challenge-expired {
+    background-color: #f8f9fa;
+    border-left: 4px solid #6c757d;
+}
+
+.challenge-list .challenge-item.challenge-expired .card-title,
+.challenge-list .challenge-item.challenge-expired .card-text {
+    color: #6c757d;
+}
+
+.challenge-list .challenge-item.challenge-expired .progress-bar {
+    background-color: #6c757d;
+}
+
+.challenge-actions .checked-in {
+    background-color: #28a745 !important;
+    border-color: #28a745 !important;
+}
+
+.challenge-actions .checked-in:hover {
+    background-color: #218838 !important;
+    border-color: #1e7e34 !important;
+}
+
+.challenge-actions button:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+/* Challenge Progress Section */
 .challenge-progress {
     background: #f8f9fa;
     padding: 20px;
     border-radius: 8px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.challenge-progress h3 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 10px;
+}
+
+.challenge-progress .progress {
+    height: 10px;
+    margin: 15px 0;
+    border-radius: 5px;
+    background-color: #e9ecef;
+}
+
+.challenge-progress .progress-bar {
+    border-radius: 5px;
+    transition: width 0.6s ease;
+}
+
+.challenge-progress .card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+
+.challenge-progress .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.challenge-progress .card-title {
+    font-size: 1.1rem;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.challenge-progress .card-text {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.challenge-progress .badge {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+    margin-left: 5px;
 }
 
 .progress {
@@ -248,6 +332,10 @@ h1::after {
     
     .tab-content {
         padding: 20px 0;
+    }
+
+    .challenge-progress h3 {
+        font-size: 1.3rem;
     }
 }
 

@@ -6,6 +6,8 @@ from django.db import transaction
 from .models import User, SleepChallenge, UserChallenge, ChallengeCheckIn
 import json
 import time
+from django.db import IntegrityError
+from datetime import timedelta
 
 # 获取挑战列表
 @require_http_methods(["GET"])
@@ -28,6 +30,22 @@ def get_challenges(request):
                     joined = True
                     completed_days = user_challenge.completed_days
             
+            today = timezone.now().date()
+            is_expired = challenge.end_date < today
+            is_checked_in_today = False
+            last_checkin_date = None
+            
+            if joined:
+                # Get last check-in date if user has joined
+                last_checkin = ChallengeCheckIn.objects.filter(
+                    user_challenge__user=user_id,
+                    user_challenge__challenge=challenge
+                ).order_by('-checkin_date').first()
+                
+                if last_checkin:
+                    last_checkin_date = last_checkin.checkin_date.strftime('%Y-%m-%d')
+                    is_checked_in_today = last_checkin.checkin_date == today
+            
             challenges_data.append({
                 'challenge_id': challenge.challenge_id,
                 'title': challenge.challenge_title,
@@ -37,7 +55,10 @@ def get_challenges(request):
                 'initiator': challenge.initiator.user_name,
                 'joined': joined,
                 'completed_days': completed_days,
-                'total_days': (challenge.end_date - challenge.start_date).days + 1
+                'total_days': (challenge.end_date - challenge.start_date).days + 1,
+                'is_expired': is_expired,
+                'is_checked_in_today': is_checked_in_today,
+                'last_checkin_date': last_checkin_date
             })
             
         return JsonResponse({
@@ -82,26 +103,28 @@ def create_challenge(request):
         except ValueError:
             return JsonResponse({'success': False, 'message': '日期格式不正确，请使用YYYY-MM-DD格式'}, status=400)
             
-        # 生成新challenge_id
-        try:
-            last_challenge = SleepChallenge.objects.order_by('-challenge_id').first()
-            if last_challenge:
-                new_id = str(int(last_challenge.challenge_id) + 1).zfill(10)
-            else:
-                new_id = '1000000000'
-        except Exception as e:
-            print(f"生成挑战ID错误: {str(e)}")
-            new_id = str(int(timezone.now().timestamp()))[:10].ljust(10, '0')
-        
-        with transaction.atomic():
-            challenge = SleepChallenge.objects.create(
-                challenge_id=new_id,
-                challenge_title=title,
-                initiator=user,
-                start_date=start_date,
-                end_date=end_date,
-                description=description
-            )
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                with transaction.atomic():
+                    # Get the latest challenge ID safely
+                    last_challenge = SleepChallenge.objects.select_for_update().order_by('-challenge_id').first()
+                    new_id = str(int(last_challenge.challenge_id) + 1).zfill(10) if last_challenge else '1000000000'
+                    
+                    challenge = SleepChallenge.objects.create(
+                        challenge_id=new_id,
+                        challenge_title=title,
+                        initiator=user,
+                        start_date=start_date,
+                        end_date=end_date,
+                        description=description
+                    )
+                    break
+            except IntegrityError as e:
+                if 'Duplicate entry' in str(e) and attempt < max_retries - 1:
+                    time.sleep(0.1 * (attempt + 1))
+                    continue
+                raise
             
             UserChallenge.objects.create(
                 user=user,
@@ -238,6 +261,18 @@ def checkin_challenge(request, challenge_id):
         if today < challenge.start_date or today > challenge.end_date:
             return JsonResponse({'success': False, 'message': '当前不在挑战有效期内，无法打卡'}, status=400)
             
+        # 检查是否连续打卡
+        yesterday = today - timedelta(days=1)
+        last_checkin = ChallengeCheckIn.objects.filter(
+            user_challenge=user_challenge
+        ).order_by('-checkin_date').first()
+        
+        if last_checkin and last_checkin.checkin_date != yesterday and last_checkin.checkin_date != today:
+            return JsonResponse({
+                'success': False,
+                'message': '请保持连续打卡，您已错过昨天的打卡'
+            }, status=400)
+            
         max_retries = 3
         for attempt in range(max_retries):
             try:
@@ -266,12 +301,60 @@ def checkin_challenge(request, challenge_id):
         return JsonResponse({
             'success': True,
             'message': '打卡成功',
-            'completed_days': user_challenge.completed_days
+            'completed_days': user_challenge.completed_days,
+            'is_checked_in_today': True
         })
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
-# 获取挑战进度
+# 获取用户参与的挑战
+@require_http_methods(["GET"])
+def get_user_challenges(request):
+    try:
+        user_id = request.session.get('user_id')
+        if not user_id:
+            return JsonResponse({'success': False, 'message': '请先登录'}, status=401)
+            
+        user = get_object_or_404(User, user_id=user_id)
+        user_challenges = UserChallenge.objects.filter(user=user).select_related('challenge')
+        
+        challenges_data = []
+        today = timezone.now().date()
+        
+        for uc in user_challenges:
+            challenge = uc.challenge
+            is_expired = challenge.end_date < today
+            
+            # 获取最后打卡日期
+            last_checkin = ChallengeCheckIn.objects.filter(
+                user_challenge=uc
+            ).order_by('-checkin_date').first()
+            
+            # 检查今日是否已打卡
+            is_checked_in_today = False
+            if last_checkin and last_checkin.checkin_date == today:
+                is_checked_in_today = True
+            
+            challenges_data.append({
+                'challenge_id': challenge.challenge_id,
+                'title': challenge.challenge_title,
+                'start_date': challenge.start_date.strftime('%Y-%m-%d'),
+                'end_date': challenge.end_date.strftime('%Y-%m-%d'),
+                'completed_days': uc.completed_days,
+                'total_days': (challenge.end_date - challenge.start_date).days + 1,
+                'is_expired': is_expired,
+                'is_checked_in_today': is_checked_in_today,
+                'last_checkin_date': last_checkin.checkin_date.strftime('%Y-%m-%d') if last_checkin else None
+            })
+            
+        return JsonResponse({
+            'success': True,
+            'challenges': challenges_data
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+# 获取单个挑战进度
 @require_http_methods(["GET"])
 def get_challenge_progress(request, challenge_id):
     try:
@@ -307,3 +390,21 @@ def get_challenge_progress(request, challenge_id):
         })
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+# 自动更新挑战状态
+def update_challenge_status():
+    try:
+        today = timezone.now().date()
+        # 更新过期挑战状态
+        expired_challenges = SleepChallenge.objects.filter(
+            end_date__lt=today,
+            is_active=True
+        )
+        
+        count = expired_challenges.update(is_active=False)
+        print(f"已更新 {count} 个过期挑战状态")
+        
+        return True
+    except Exception as e:
+        print(f"更新挑战状态失败: {str(e)}")
+        return False

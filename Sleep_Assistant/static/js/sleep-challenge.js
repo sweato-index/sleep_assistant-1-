@@ -4,6 +4,7 @@ $(document).ready(function() {
 
     function initChallengeFeatures() {
         loadChallenges();
+        loadUserChallenges();
         setupChallengeEventHandlers();
     }
 
@@ -22,14 +23,33 @@ $(document).ready(function() {
             });
     }
 
+    // 加载用户参与的挑战
+    function loadUserChallenges() {
+        $.get('/api/challenge/user/')
+            .done(function(data) {
+                if(data.success) {
+                    renderUserChallenges(data.challenges);
+                } else {
+                    $('#userChallengesList').html('<div class="alert alert-info">您当前没有参与任何挑战</div>');
+                }
+            })
+            .fail(function() {
+                $('#userChallengesList').html('<div class="alert alert-danger">加载挑战进度失败</div>');
+            });
+    }
+
     // 渲染挑战列表
     function renderChallenges(challenges) {
         let html = '';
         challenges.forEach(challenge => {
             const progressPercent = Math.round((challenge.completed_days / challenge.total_days) * 100);
             
+            const isExpired = challenge.is_expired;
+            const isCheckedInToday = challenge.is_checked_in_today;
+            
             html += `
-                <div class="card mb-3 challenge-item" data-id="${challenge.challenge_id}">
+                <div class="card mb-3 challenge-item ${isExpired ? 'challenge-expired' : ''}" 
+                     data-id="${challenge.challenge_id}">
                     <div class="card-body">
                         <h5 class="card-title">${challenge.title}</h5>
                         <p class="card-text">${challenge.description}</p>
@@ -38,9 +58,13 @@ $(document).ready(function() {
                                 <i class="fas fa-user"></i> ${challenge.initiator}
                                 <i class="fas fa-calendar ml-2"></i> ${challenge.start_date} 至 ${challenge.end_date}
                             </small>
-                            <span class="badge badge-${challenge.joined ? 'success' : 'secondary'}">
-                                ${challenge.joined ? '已参加' : '未参加'}
-                            </span>
+                            <div>
+                                ${isExpired ? 
+                                    '<span class="badge badge-secondary">已过期</span>' : 
+                                    `<span class="badge badge-${challenge.joined ? 'success' : 'secondary'}">
+                                        ${challenge.joined ? '已参加' : '未参加'}
+                                    </span>`}
+                            </div>
                         </div>
                         <div class="progress mb-2">
                             <div class="progress-bar" role="progressbar" 
@@ -53,15 +77,62 @@ $(document).ready(function() {
                         </div>
                         <div class="challenge-actions">
                             ${challenge.joined ? 
-                                `<button class="btn btn-sm btn-outline-danger leave-challenge">退出挑战</button>
-                                 <button class="btn btn-sm btn-primary checkin-challenge ml-2">今日打卡</button>` : 
-                                `<button class="btn btn-sm btn-success join-challenge">加入挑战</button>`}
+                                `<button class="btn btn-sm btn-outline-danger leave-challenge" ${isExpired ? 'disabled' : ''}>
+                                    退出挑战
+                                </button>
+                                <button class="btn btn-sm ${isCheckedInToday ? 'btn-success checked-in' : 'btn-primary'} checkin-challenge ml-2" 
+                                    ${isExpired || isCheckedInToday ? 'disabled' : ''}>
+                                    ${isCheckedInToday ? '已打卡' : '今日打卡'}
+                                </button>` : 
+                                `<button class="btn btn-sm btn-success join-challenge" ${isExpired ? 'disabled' : ''}>
+                                    加入挑战
+                                </button>`}
                         </div>
+                        ${challenge.last_checkin_date ? 
+                            `<small class="text-muted d-block mt-2">
+                                <i class="fas fa-calendar-check"></i> 上次打卡: ${challenge.last_checkin_date}
+                            </small>` : ''}
                     </div>
                 </div>
             `;
         });
         $('#challengesList').html(html);
+    }
+
+    // 渲染用户挑战列表
+    function renderUserChallenges(challenges) {
+        let html = '';
+        challenges.forEach(challenge => {
+            const progressPercent = Math.round((challenge.completed_days / challenge.total_days) * 100);
+            const progressClass = challenge.is_expired ? 'bg-secondary' : 'bg-success';
+            
+            html += `
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">${challenge.title}</h5>
+                        <p class="card-text text-muted small">
+                            ${challenge.start_date} 至 ${challenge.end_date}
+                            ${challenge.is_expired ? '<span class="badge bg-danger float-end">已结束</span>' : ''}
+                        </p>
+                        <div class="progress mb-2">
+                            <div class="progress-bar ${progressClass}" 
+                                 role="progressbar" 
+                                 style="width: ${progressPercent}%" 
+                                 aria-valuenow="${progressPercent}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                                ${challenge.completed_days}/${challenge.total_days}天
+                            </div>
+                        </div>
+                        ${challenge.last_checkin_date ? 
+                            `<p class="small mb-0">上次打卡: ${challenge.last_checkin_date}</p>` : ''}
+                        ${challenge.is_checked_in_today ? 
+                            `<p class="small text-success mb-0"><i class="fas fa-check-circle"></i> 今日已打卡</p>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        $('#userChallengesList').html(html);
     }
 
     // 设置事件处理器
@@ -100,6 +171,7 @@ $(document).ready(function() {
                     $('#newChallengeForm')[0].reset();
                     $('#newChallengeModal').modal('hide');
                     loadChallenges();
+                    loadUserChallenges();
                     showToast('success', data.message);
                 } else {
                     showToast('error', data.message);
@@ -127,6 +199,7 @@ $(document).ready(function() {
             }).done(function(data) {
                 if(data.success) {
                     loadChallenges();
+                    loadUserChallenges();
                     showToast('success', data.message);
                 } else {
                     showToast('error', data.message);
@@ -156,6 +229,7 @@ $(document).ready(function() {
             }).done(function(data) {
                 if(data.success) {
                     loadChallenges();
+                    loadUserChallenges();
                     showToast('success', data.message);
                 } else {
                     showToast('error', data.message);
@@ -183,15 +257,19 @@ $(document).ready(function() {
             }).done(function(data) {
                 if(data.success) {
                     loadChallenges();
-                    updateChallengeProgress(data.completed_days);
+                    loadUserChallenges();
                     showToast('success', data.message);
+                    
+                    // 更新按钮状态为已打卡
+                    btn.removeClass('btn-primary').addClass('btn-success checked-in')
+                       .text('已打卡').prop('disabled', true);
                 } else {
                     showToast('error', data.message);
+                    btn.prop('disabled', false).text('今日打卡');
                 }
             }).fail(function(xhr) {
                 const msg = xhr.responseJSON?.message || '打卡失败';
                 showToast('error', msg);
-            }).always(function() {
                 btn.prop('disabled', false).text('今日打卡');
             });
         });
@@ -225,17 +303,6 @@ $(document).ready(function() {
         toast.toast('show');
         toast.on('hidden.bs.toast', function() {
             $(this).remove();
-        });
-    }
-
-    // 更新挑战进度
-    function updateChallengeProgress(completedDays) {
-        $('.challenge-progress .progress-bar').each(function() {
-            const progress = $(this);
-            const totalDays = parseInt(progress.attr('aria-valuemax'));
-            const percent = Math.round((completedDays / totalDays) * 100);
-            progress.css('width', percent + '%').attr('aria-valuenow', percent);
-            progress.text(`${completedDays}/${totalDays}天`);
         });
     }
 
