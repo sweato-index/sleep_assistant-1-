@@ -646,6 +646,180 @@ def login(request):
     
     return JsonResponse({'success': False, 'message': '无效请求方法'})
 
+# 专家问答功能视图
+@require_http_methods(["GET"])
+def expert_questions(request):
+    """获取专家问答列表"""
+    try:
+        questions = Document.objects.filter(doc_type='2').order_by('-create_time')[:20]
+        questions_data = []
+        for q in questions:
+            questions_data.append({
+                'id': q.doc_id,
+                'title': q.title,
+                'summary': q.summary,
+                'author': q.post_user.user_name if hasattr(q.post_user, 'user_name') else '匿名用户',
+                'create_time': timezone.localtime(q.create_time).strftime('%Y-%m-%d %H:%M') if q.create_time else '未知时间',
+                'answered': bool(q.text)  # 是否有专家回答
+            })
+        return JsonResponse({'questions': questions_data})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+@require_http_methods(["POST"])
+def create_question(request):
+    """用户提交新问题"""
+    try:
+        print("Received create_question request")  # Debug log
+        try:
+            data = json.loads(request.body)
+            print(f"Request data: {data}")  # Debug log
+        except json.JSONDecodeError as e:
+            print(f"JSON decode error: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': '无效的JSON数据',
+                'error': str(e)
+            }, status=400)
+            
+        user_id = request.session.get('user_id')
+        if not user_id:
+            print("User not logged in")  # Debug log
+            return JsonResponse({'success': False, 'message': '请先登录'}, status=401)
+            
+        try:
+            user = User.objects.get(user_id=user_id)
+            print(f"Found user: {user.user_id}")  # Debug log
+        except User.DoesNotExist:
+            print(f"User not found: {user_id}")  # Debug log
+            return JsonResponse({'success': False, 'message': '用户不存在'}, status=404)
+            
+        title = str(data.get('title', '')).strip()
+        summary = str(data.get('summary', '')).strip()
+        
+        print(f"Title: {title}")  # Debug log
+        print(f"Summary: {summary}")  # Debug log
+        
+        if not title or not summary:
+            print("Title or summary is empty")  # Debug log
+            return JsonResponse({
+                'success': False, 
+                'message': '标题和问题描述不能为空',
+                'received_data': {
+                    'title_length': len(title),
+                    'summary_length': len(summary)
+                }
+            }, status=400)
+            
+        # 生成新doc_id
+        try:
+            last_doc = Document.objects.order_by('-doc_id').first()
+            if last_doc:
+                new_id = str(int(last_doc.doc_id) + 1).zfill(10)
+                print(f"Using incremented doc_id: {new_id}")  # Debug log
+            else:
+                new_id = '1000000000'
+                print("Using default doc_id")  # Debug log
+        except Exception as e:
+            print(f"doc_id generation error: {str(e)}")
+            new_id = str(int(timezone.now().timestamp()))[-10:].ljust(10, '0')
+            print(f"Using fallback doc_id: {new_id}")  # Debug log
+        
+        # 创建问题记录
+        try:
+            print("Attempting to create Document record")  # Debug log
+            question = Document(
+                doc_id=new_id,
+                doc_type='2',  # 专家问答
+                post_user=user,
+                title=title,
+                summary=summary,
+                text='',  # 设置空字符串默认值
+                create_time=timezone.now()
+            )
+            print("Created Document object, validating...")  # Debug log
+            question.full_clean()  # 验证模型字段
+            print("Validation passed, saving...")  # Debug log
+            question.save()
+            print(f"Successfully saved question with ID: {question.doc_id}")  # Debug log
+            
+            return JsonResponse({
+                'success': True,
+                'message': '问题提交成功',
+                'question_id': question.doc_id
+            })
+            
+        except Exception as e:
+            print(f"Error creating question: {str(e)}")  # Debug log
+            return JsonResponse({
+                'success': False,
+                'message': '问题提交失败',
+                'error': str(e)
+            }, status=500)
+            
+    except Exception as e:
+        print(f"Unexpected error in create_question: {str(e)}")  # Debug log
+        return JsonResponse({
+            'success': False,
+            'message': '服务器内部错误',
+            'error': str(e)
+        }, status=500)
+
+@require_http_methods(["GET"])
+def question_detail(request, question_id):
+    """获取问题详情"""
+    try:
+        question = get_object_or_404(Document, doc_id=question_id, doc_type='2')
+        
+        return JsonResponse({
+            'success': True,
+            'title': question.title,
+            'summary': question.summary,
+            'answer': question.text,
+            'author': question.post_user.user_name if hasattr(question.post_user, 'user_name') else '匿名用户',
+            'create_time': timezone.localtime(question.create_time).strftime('%Y-%m-%d %H:%M') if question.create_time else '未知时间',
+            'answered': bool(question.text)
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+@require_http_methods(["POST"])
+def answer_question(request, question_id):
+    """专家回答问题"""
+    try:
+        print(f"Received answer request for question {question_id}")  # Debug log
+        data = json.loads(request.body)
+        user_id = request.session.get('user_id')
+        print(f"User ID from session: {user_id}")  # Debug log
+        if not user_id:
+            return JsonResponse({'success': False, 'message': '请先登录'}, status=401)
+            
+        # 检查用户是否是专家
+        user = get_object_or_404(User, user_id=user_id)
+        print(f"User type: {user.user_type}")  # Debug log
+        if user.user_type != '2':  # 假设2是专家用户类型
+            print(f"User {user_id} is not an expert (type={user.user_type})")  # Debug log
+            return JsonResponse({'success': False, 'message': '只有专家可以回答问题'}, status=403)
+            
+        answer = data.get('answer')
+        print(f"Answer content length: {len(answer) if answer else 0}")  # Debug log
+        if not answer:
+            return JsonResponse({'success': False, 'message': '回答内容不能为空'}, status=400)
+            
+        question = get_object_or_404(Document, doc_id=question_id, doc_type='2')
+        if question.text:
+            return JsonResponse({'success': False, 'message': '该问题已有回答'}, status=400)
+            
+        question.text = answer
+        question.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': '回答提交成功'
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
 def check_session(request):
     if request.method == 'GET':
         is_authenticated = request.session.get('is_authenticated', False)
@@ -659,7 +833,8 @@ def check_session(request):
                     'user': {
                         'id': user.user_id,
                         'name': user.user_name,
-                        'email': user.email
+                        'email': user.email,
+                        'user_type': user.user_type  # 添加用户类型
                     }
                 })
         

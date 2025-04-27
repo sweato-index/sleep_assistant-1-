@@ -25,7 +25,9 @@ from myapp.views import (
     add_comment, toggle_like, toggle_favorite,
     save_ai_qa, create_group, get_groups,
     join_group, leave_group, get_group_chat,
-    send_group_message
+    send_group_message,expert_questions,
+    create_question, question_detail,
+    answer_question
 )
 from myapp.sleep_challenge_views import (
     get_challenges, create_challenge,
@@ -73,4 +75,9 @@ urlpatterns = [
     path('api/challenge/<str:challenge_id>/checkin/', checkin_challenge, name='checkin_challenge'),
     path('api/challenge/user/', get_user_challenges, name='get_user_challenges'),
     path('api/challenge/<str:challenge_id>/progress/', get_challenge_progress, name='get_challenge_progress'),
+    # 专家问答功能路由
+    path('api/expert/questions/', expert_questions, name='expert_questions'),
+    path('api/expert/question/create/', create_question, name='create_question'),
+    path('api/expert/question/<str:question_id>/', question_detail, name='question_detail'),
+    path('api/expert/question/<str:question_id>/answer/', answer_question, name='answer_question'),
 ]

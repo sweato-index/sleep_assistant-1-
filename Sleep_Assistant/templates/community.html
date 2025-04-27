@@ -249,30 +249,56 @@
                     <div id="qna" class="tab-pane fade">
                         <div class="row">
                             <div class="col-md-8">
-                                <div class="expert-questions">
-                                    <h3>最新问题</h3>
-                                    <div class="question-item">
-                                        <h4>如何改善睡眠质量？</h4>
-                                        <p>专家回答：建议保持规律的作息时间...</p>
-                                        <a href="#" class="btn btn-primary">查看详情</a>
+                                <div class="expert-questions-container">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h3>专家问答</h3>
+                                        <button id="newQuestionBtn" class="btn btn-primary">提问专家</button>
+                                    </div>
+                                    
+                                    <!-- 新问题表单 (默认隐藏) -->
+                                    <div id="newQuestionForm" class="card mb-4" style="display: none;">
+                                        <div class="card-body">
+                                            <h5 class="card-title">向专家提问</h5>
+                                            <form id="questionForm">
+                                                <div class="form-group">
+                                                    <label for="questionTitle">问题标题</label>
+                                                    <input type="text" class="form-control" id="questionTitle" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="questionContent">问题描述</label>
+                                                    <textarea class="form-control" id="questionContent" rows="5" required></textarea>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary">提交</button>
+                                                <button type="button" id="cancelQuestionBtn" class="btn btn-secondary ml-2">取消</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 问题列表 -->
+                                    <div id="expertQuestionsList">
+                                        <div class="text-center py-5">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="sr-only">加载中...</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="ask-question">
-                                    <h3>向专家提问</h3>
-                                    <form>
-                                        <div class="form-group">
-                                            <label>问题标题</label>
-                                            <input type="text" class="form-control">
+                                <div class="expert-tips">
+                                    <h3>专家建议</h3>
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">改善睡眠小贴士</h5>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-check-circle text-success mr-2"></i>保持规律作息时间</li>
+                                                <li><i class="fas fa-check-circle text-success mr-2"></i>睡前避免使用电子设备</li>
+                                                <li><i class="fas fa-check-circle text-success mr-2"></i>保持卧室环境舒适</li>
+                                                <li><i class="fas fa-check-circle text-success mr-2"></i>适度运动有助于睡眠</li>
+                                            </ul>
                                         </div>
-                                        <div class="form-group">
-                                            <label>问题描述</label>
-                                            <textarea class="form-control" rows="3"></textarea>
-                                        </div>
-                                    <button type="submit" class="btn btn-primary">提交问题</button>
-                                    </form>
-                                    <div class="mt-5 mb-4 text-center">
+                                    </div>
+                                    <div class="mt-4 text-center">
                                         <a href="{% url 'ai_assistant' %}" class="btn btn-outline-primary btn-lg">
                                             <i class="fas fa-robot mr-2"></i>
                                             问问AI助手的建议吧
@@ -282,6 +308,8 @@
                             </div>
                         </div>
                     </div>
+
+                    
 
                     <!-- 睡眠日记 -->
                     <div id="diary" class="tab-pane fade">
@@ -480,6 +508,37 @@
                     <div class="text-center mt-3">
                         <p>已有账号? <a href="#signinModal" data-bs-toggle="modal" data-dismiss="modal">立即登录</a></p>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 问题详情模态框 -->
+    <div class="modal fade" id="questionDetailModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">问题详情</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="question-content mb-4"></div>
+                    <div class="answer-section">
+                        <h5>专家回答</h5>
+                        <div class="answer-content mb-4"></div>
+                    </div>
+                    <form id="answerForm" style="display: none;">
+                        <div class="form-group">
+                            <label for="answerContent">您的回答</label>
+                            <textarea class="form-control" id="answerContent" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">提交回答</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
                 </div>
             </div>
         </div>

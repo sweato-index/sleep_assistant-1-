@@ -28,6 +28,47 @@ $(document).ready(function() {
             });
     }
 
+    // 加载专家问答列表
+    function loadExpertQuestions() {
+        $.get('/api/expert/questions/')
+            .done(function(data) {
+                if(data.questions && data.questions.length > 0) {
+                    renderExpertQuestions(data.questions);
+                } else {
+                    $('#expertQuestionsList').html('<div class="alert alert-info">暂无专家问答，快来提问吧！</div>');
+                }
+            })
+            .fail(function() {
+                $('#expertQuestionsList').html('<div class="alert alert-danger">加载专家问答失败，请刷新重试</div>');
+            });
+    }
+
+    // 渲染专家问答列表
+    function renderExpertQuestions(questions) {
+        let html = '';
+        questions.forEach(q => {
+            html += `
+                <div class="card mb-3 question-item" data-id="${q.id}">
+                    <div class="card-body">
+                        <h5 class="card-title">${q.title}</h5>
+                        <p class="card-text">${q.summary}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="fas fa-user"></i> ${q.author} 
+                                <i class="fas fa-clock ml-2"></i> ${q.create_time}
+                                <span class="badge ${q.answered ? 'bg-success' : 'bg-warning'} ml-2">
+                                    ${q.answered ? '已回答' : '待回答'}
+                                </span>
+                            </small>
+                            <button class="btn btn-sm btn-outline-primary view-question-btn">查看详情</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        $('#expertQuestionsList').html(html);
+    }
+
     // 渲染帖子列表
     function renderPosts(posts) {
         let html = '';
@@ -145,8 +186,190 @@ $(document).ready(function() {
         });
     });
 
-    // 初始化加载帖子
+    // 新问题按钮点击事件
+    $('#newQuestionBtn').click(function() {
+        console.log('提问按钮被点击');
+        checkLoginStatus().done(function(data) {
+            console.log('登录状态检查结果:', data);
+            if(data.isAuthenticated) {
+                console.log('用户已登录，显示提问表单');
+                $('#newQuestionForm').slideDown('fast');
+                $('#newQuestionBtn').hide();
+            } else {
+                console.log('用户未登录，显示登录模态框');
+                $('#signinModal').modal('show');
+            }
+        }).fail(function(err) {
+            console.error('登录状态检查失败:', err);
+        });
+    });
+
+    // 取消提问
+    $('#cancelQuestionBtn').click(function() {
+        $('#questionForm')[0].reset();
+        $('#newQuestionForm').slideUp();
+        $('#newQuestionBtn').show();
+    });
+
+    // 提交新问题
+    $('#questionForm').submit(function(e) {
+        e.preventDefault();
+        const title = $('#questionTitle').val().trim();
+        const summary = $('#questionContent').val().trim();
+        
+        if(!title || !summary) {
+            alert('标题和问题描述不能为空');
+            return;
+        }
+
+        const submitBtn = $(this).find('button[type="submit"]');
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 提交中...');
+
+        // 获取CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+        
+        $.ajax({
+            url: '/api/expert/question/create/',
+            method: 'POST',
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            data: JSON.stringify({
+                title: title,
+                summary: summary
+            })
+        }).done(function(data) {
+            if(data.success) {
+                $('#questionForm')[0].reset();
+                $('#newQuestionForm').slideUp();
+                $('#newQuestionBtn').show();
+                loadExpertQuestions(); // 重新加载问题列表
+            }
+            alert(data.message);
+        }).fail(function() {
+            alert('提交失败，请重试');
+        }).always(function() {
+            submitBtn.prop('disabled', false).text('提交');
+        });
+    });
+
+    // 查看问题详情
+    $(document).on('click', '.view-question-btn', function() {
+        const questionId = $(this).closest('.question-item').data('id');
+        $.get(`/api/expert/question/${questionId}/`)
+            .done(function(data) {
+                if(data.success) {
+                    $('#questionDetailModal .modal-title').text(data.title);
+                    $('#questionDetailModal .question-content').text(data.summary);
+                    $('#questionDetailModal .answer-content').html(
+                        data.answered ? 
+                            `<p>${data.answer}</p>` : 
+                            '<p class="text-muted">暂无专家回答</p>'
+                    );
+                    
+                    // 检查登录状态并显示回答表单
+                    checkLoginStatus().done(function(loginData) {
+                        console.log('Login status:', loginData);
+                        if(loginData.isAuthenticated && loginData.user && 
+                           loginData.user.user_type === '2' && !data.answered) {
+                            console.log('Showing answer form for expert');
+                            $('#answerForm').show();
+                            $('#answerForm').data('question-id', questionId);
+                            $('#answerForm').find('textarea').val('');
+                        } else {
+                            console.log('Hiding answer form');
+                            $('#answerForm').hide();
+                        }
+                    });
+                    
+                    // 添加回答表单标题
+                    if(!$('#answerForm h5').length) {
+                        $('#answerForm').prepend('<h5 class="card-title">回答问题</h5>');
+                    }
+                    
+                    $('#questionDetailModal').modal('show');
+                } else {
+                    alert('获取问题详情失败');
+                }
+            })
+            .fail(function() {
+                alert('获取问题详情失败');
+            });
+    });
+
+    // 提交回答
+    $('#answerForm').submit(function(e) {
+        e.preventDefault();
+        const answer = $('#answerContent').val().trim();
+        const questionId = $(this).data('question-id');
+        
+        if(!answer) {
+            alert('回答内容不能为空');
+            return;
+        }
+
+        const submitBtn = $(this).find('button[type="submit"]');
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 提交中...');
+
+        // 获取CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+        
+        $.ajax({
+            url: `/api/expert/question/${questionId}/answer/`,
+            method: 'POST',
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            data: JSON.stringify({
+                answer: answer
+            })
+        }).done(function(data) {
+            if(data.success) {
+                $('#answerContent').val('');
+                $('#questionDetailModal').modal('hide');
+                loadExpertQuestions(); // 重新加载问题列表
+            }
+            alert(data.message);
+        }).fail(function() {
+            alert('提交失败，请重试');
+        }).always(function() {
+            submitBtn.prop('disabled', false).text('提交');
+        });
+    });
+
+    // 初始化加载帖子和专家问答
     loadPosts();
+    loadExpertQuestions();
 
     // 其他原有功能保持不变
     if(window.location.hash) {
