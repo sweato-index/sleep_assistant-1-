@@ -262,16 +262,37 @@ def checkin_challenge(request, challenge_id):
             return JsonResponse({'success': False, 'message': '当前不在挑战有效期内，无法打卡'}, status=400)
             
         # 检查是否连续打卡
-        yesterday = today - timedelta(days=1)
         last_checkin = ChallengeCheckIn.objects.filter(
             user_challenge=user_challenge
         ).order_by('-checkin_date').first()
         
-        if last_checkin and last_checkin.checkin_date != yesterday and last_checkin.checkin_date != today:
-            return JsonResponse({
-                'success': False,
-                'message': '请保持连续打卡，您已错过昨天的打卡'
-            }, status=400)
+        print(f"Debug - Last checkin: {last_checkin.checkin_date if last_checkin else 'None'}, Today: {today}")
+        
+        if last_checkin and last_checkin.checkin_date != today:
+            # 计算错过的打卡天数
+            days_missed = (today - last_checkin.checkin_date).days - 1
+            print(f"Debug - Days missed: {days_missed}")
+            
+            if days_missed > 0:
+                # 生成错过的日期列表
+                missed_dates = [
+                    (last_checkin.checkin_date + timedelta(days=i)).strftime('%Y-%m-%d')
+                    for i in range(1, days_missed + 1)
+                    if (last_checkin.checkin_date + timedelta(days=i)) < today
+                ]
+                print(f"Debug - Missed dates: {', '.join(missed_dates)}")
+                
+                response = JsonResponse({
+                    'success': False,
+                    'message': f'请保持连续打卡，您已错过{days_missed}天打卡',
+                    'details': {
+                        'missed_dates': missed_dates,
+                        'last_checkin_date': last_checkin.checkin_date.strftime('%Y-%m-%d'),
+                        'suggestion': '请从上次打卡日期后连续打卡'
+                    }
+                }, status=400)
+                print(f"Debug - Returning response: {response.content}")
+                return response
             
         max_retries = 3
         for attempt in range(max_retries):

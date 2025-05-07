@@ -35,6 +35,7 @@ from myapp.sleep_challenge_views import (
     checkin_challenge, get_challenge_progress,
     get_user_challenges
 )
+from myapp.stress_views import predict_stress, render_stress_assessment
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -47,6 +48,7 @@ urlpatterns = [
     path('profile/', profile, name='profile'),
     path('blog-details/', blog_details, name='blog_details'),
     path('ai-assistant/', ai_assistant, name='ai_assistant'),
+    path('stress-assessment/', render_stress_assessment, name='stress_assessment'),
     path('forum-topic/<str:post_id>/', forum_topic, name='forum_topic'),
     path('api/user_ids/', get_all_user_ids, name='get_all_user_ids'),
     path('api/register/', register, name='register'),
@@ -75,6 +77,8 @@ urlpatterns = [
     path('api/challenge/<str:challenge_id>/checkin/', checkin_challenge, name='checkin_challenge'),
     path('api/challenge/user/', get_user_challenges, name='get_user_challenges'),
     path('api/challenge/<str:challenge_id>/progress/', get_challenge_progress, name='get_challenge_progress'),
+    # 压力评估功能路由
+    path('api/predict-stress/', predict_stress, name='predict_stress'),
     # 专家问答功能路由
     path('api/expert/questions/', expert_questions, name='expert_questions'),
     path('api/expert/question/create/', create_question, name='create_question'),

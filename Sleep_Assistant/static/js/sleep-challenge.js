@@ -246,6 +246,38 @@ $(document).ready(function() {
         $(document).on('click', '.checkin-challenge', function() {
             const challengeId = $(this).closest('.challenge-item').data('id');
             const btn = $(this);
+            
+            // 先检查是否今天已打卡
+            const isCheckedInToday = btn.hasClass('checked-in');
+            if (isCheckedInToday) {
+                showToast('info', '今日已打卡');
+                return;
+            }
+
+            // 检查挑战是否过期
+            const isExpired = $(this).closest('.challenge-item').hasClass('challenge-expired');
+            if (isExpired) {
+                showToast('error', '挑战已过期，无法打卡');
+                return;
+            }
+
+            // 获取上次打卡日期
+            const lastCheckinText = $(this).closest('.card-body').find('small i.fa-calendar-check').parent().text();
+            const lastCheckinDate = lastCheckinText ? lastCheckinText.replace('上次打卡: ', '').trim() : null;
+
+            if (lastCheckinDate) {
+                const today = new Date();
+                const lastDate = new Date(lastCheckinDate);
+                const daysMissed = Math.floor((today - lastDate) / (1000 * 60 * 60 * 24));
+                
+                if (daysMissed > 1) {
+                    const confirmMsg = `您已错过${daysMissed-1}天打卡，确定要继续打卡吗？`;
+                    if (!confirm(confirmMsg)) {
+                        return;
+                    }
+                }
+            }
+
             btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 打卡中...');
 
             $.ajax({
@@ -268,9 +300,27 @@ $(document).ready(function() {
                     btn.prop('disabled', false).text('今日打卡');
                 }
             }).fail(function(xhr) {
-                const msg = xhr.responseJSON?.message || '打卡失败';
+                console.log('Check-in failed with response:', xhr.responseJSON);
+                console.log('Status:', xhr.status, 'Status text:', xhr.statusText);
+                
+                let msg = '打卡失败';
+                if(xhr.responseJSON) {
+                    if(xhr.responseJSON.details) {
+                        msg = `${xhr.responseJSON.message}<br>`;
+                        msg += `错过日期: ${xhr.responseJSON.details.missed_dates.join(', ')}<br>`;
+                        msg += `建议: ${xhr.responseJSON.details.suggestion}`;
+                    } else {
+                        msg = xhr.responseJSON.message;
+                    }
+                } else {
+                    console.log('No JSON response received');
+                    console.log('Full response:', xhr);
+                    msg = '服务器返回了无效响应';
+                }
+                
                 showToast('error', msg);
                 btn.prop('disabled', false).text('今日打卡');
+                console.log('Button reset completed');
             });
         });
 
@@ -288,22 +338,31 @@ $(document).ready(function() {
 
     // 显示Toast通知
     function showToast(type, message) {
-        const toast = $(`
-            <div class="toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="d-flex">
-                    <div class="toast-body">
-                        ${message}
+        // 使用浏览器原生alert作为fallback
+        try {
+            const toast = $(`
+                <div class="toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                     </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-dismiss="toast" aria-label="Close"></button>
                 </div>
-            </div>
-        `);
-        $('#toastContainer').append(toast);
-        toast.toast({ autohide: true, delay: 3000 });
-        toast.toast('show');
-        toast.on('hidden.bs.toast', function() {
-            $(this).remove();
-        });
+            `);
+            $('#toastContainer').append(toast);
+            const bsToast = new bootstrap.Toast(toast[0], {
+                autohide: true,
+                delay: 3000
+            });
+            bsToast.show();
+            toast.on('hidden.bs.toast', function() {
+                $(this).remove();
+            });
+        } catch (e) {
+            console.error('Toast error:', e);
+            alert(message); // Fallback to simple alert
+        }
     }
 
     // 检查登录状态
