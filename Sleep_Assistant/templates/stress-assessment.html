@@ -12,117 +12,96 @@
     <!-- CSS here -->
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/fontawesome-all.min.css' %}">
-    <link rel="stylesheet" href="{% static 'flat-icon/flaticon.css' %}">
-    <link rel="stylesheet" href="{% static 'css/meanmenu.css' %}">
-    <link rel="stylesheet" href="{% static 'css/slick.css' %}">
-    <link rel="stylesheet" href="{% static 'css/aos.css' %}">
     <link rel="stylesheet" href="{% static 'css/animate.css' %}">
-    <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}">
-    <link rel="stylesheet" href="{% static 'css/default.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    <style>
+        .stress-assessment {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 40px 0;
+        }
+        .assessment-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        .stress-meter {
+            height: 20px;
+            background: linear-gradient(to right, #4CAF50, #FFC107, #F44336);
+            border-radius: 10px;
+            margin: 20px 0;
+            position: relative;
+        }
+        .stress-indicator {
+            position: absolute;
+            width: 20px;
+            height: 30px;
+            background: #333;
+            top: -5px;
+            transform: translateX(-50%);
+            transition: left 0.5s ease;
+        }
+        .advice-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+        .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(13,110,253,0.25);
+        }
+    </style>
 </head>
-<body>
-    <!-- preloader -->
-    <div id="loading">
-        <div id="loading-center">
-            <div id="loading-center-absolute">
-                <div class="object" id="object_one"></div>
-                <div class="object" id="object_two"></div>
-                <div class="object" id="object_three"></div>
-                <div class="object" id="object_four"></div>
-            </div>
-        </div>
-    </div>
-    <!-- preloader end -->
+<body class="stress-assessment">
 
-    <!-- Header -->
-    <header class="header-transfrent">
-        <div class="header-area">
-            <div class="container">
-                <div class="row align-items-center">
-                    <div class="col-xl-1 col-lg-1">
-                        <div class="logo-area">
-                            <a href="{% url 'home' %}"><img src="{% static 'img/logo.png' %}" alt=""></a>
-                        </div>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="assessment-card">
+                    <div class="text-center mb-4">
+                        <h2 class="mb-3">压力水平评估</h2>
+                        <p class="lead">填写以下信息评估您的压力水平</p>
                     </div>
-                    <div class="col-xl-8 col-lg-8">
-                        <div class="main-menu">
-                            <nav id="mobile-menu">
-                                <ul>
-                                    <li><a href="{% url 'home' %}">首页</a></li>
-                                    <li><a href="{% url 'science' %}">知识中心</a></li>
-                                    <li><a href="{% url 'tracker' %}">睡眠记录</a></li>
-                                    <li><a href="{% url 'assessment' %}">睡眠评分</a></li>
-                                    <li><a href="{% url 'advice' %}">睡眠助手</a></li>
-                                    <li><a href="{% url 'community' %}">交流社区</a></li>
-                                </ul>
-                            </nav>
-                        </div>
-                        <div class="mobile-menu"></div>
-                    </div>
-                    <div class="col-xl-3 col-lg-3 d-none d-lg-block">
-                        <div class="header-user-profile dropdown f-right">
-                            <div class="user-avatar dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                <img src="{% static 'img/author-2.png' %}" alt="用户头像">
-                            </div>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#signinModal" data-bs-toggle="modal">登录</a></li>
-                                <li><a class="dropdown-item" href="#signupModal" data-bs-toggle="modal">注册</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'profile' %}">用户中心</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <div class="container mt-100 mb-100">
-        <div class="row">
-            <div class="col-lg-8 offset-lg-2">
-                <div class="section-title text-center">
-                    <h2>压力水平评估</h2>
-                    <p>填写以下信息评估您的压力水平</p>
-                </div>
-                <div class="contact-form">
+                    
                     <form id="stressForm">
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="age">年龄</label>
+                                <div class="mb-3">
+                                    <label for="age" class="form-label">年龄</label>
                                     <input type="number" class="form-control" id="age" min="18" max="100" required>
                                 </div>
-                                <div class="form-group">
-                                    <label for="sleepDuration">睡眠时长(小时)</label>
+                                <div class="mb-3">
+                                    <label for="sleepDuration" class="form-label">睡眠时长(小时)</label>
                                     <input type="number" step="0.1" class="form-control" id="sleepDuration" min="0" max="24" required>
                                 </div>
-                                <div class="form-group">
-                                    <label for="activityLevel">身体活动水平(1-100)</label>
-                                    <input type="number" class="form-control" id="activityLevel" min="1" max="100" required>
+                                <div class="mb-3">
+                                    <label for="activityLevel" class="form-label">日均体力劳动时间(分钟)</label>
+                                    <input type="number" class="form-control" id="activityLevel" min="1" max="600" required>
                                 </div>
-                                <div class="form-group">
-                                    <label for="heartRate">心率(bpm)</label>
+                                <div class="mb-3">
+                                    <label for="heartRate" class="form-label">心率(bpm)</label>
                                     <input type="number" class="form-control" id="heartRate" min="40" max="200" required>
                                 </div>
-                                <div class="form-group">
-                                    <label for="dailySteps">每日步数</label>
+                                <div class="mb-3">
+                                    <label for="dailySteps" class="form-label">每日步数</label>
                                     <input type="number" class="form-control" id="dailySteps" min="0" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>性别</label>
-                                    <select class="form-control" id="gender">
+                                <div class="mb-3">
+                                    <label class="form-label">性别</label>
+                                    <select class="form-select" id="gender">
                                         <option value="female">女性</option>
                                         <option value="male">男性</option>
                                     </select>
                                 </div>
-                                <div class="form-group">
-                                    <label>职业</label>
-                                    <select class="form-control" id="occupation">
+                                <div class="mb-3">
+                                    <label class="form-label">职业</label>
+                                    <select class="form-select" id="occupation">
                                         <option value="other">其他</option>
                                         <option value="accountant">会计</option>
                                         <option value="doctor">医生</option>
@@ -137,18 +116,17 @@
                                         <option value="teacher">教师</option>
                                     </select>
                                 </div>
-                                <div class="form-group">
-                                    <label>BMI分类</label>
-                                    <select class="form-control" id="bmiCategory">
+                                <div class="mb-3">
+                                    <label class="form-label">BMI分类</label>
+                                    <select class="form-select" id="bmiCategory">
                                         <option value="normal">正常</option>
-                                        <option value="normal_weight">正常体重</option>
                                         <option value="overweight">超重</option>
                                         <option value="obese">肥胖</option>
                                     </select>
                                 </div>
-                                <div class="form-group">
-                                    <label>睡眠障碍</label>
-                                    <select class="form-control" id="sleepDisorder">
+                                <div class="mb-3">
+                                    <label class="form-label">睡眠障碍</label>
+                                    <select class="form-select" id="sleepDisorder">
                                         <option value="none">无</option>
                                         <option value="insomnia">失眠</option>
                                         <option value="sleep_apnea">睡眠呼吸暂停</option>
@@ -156,13 +134,26 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="text-center">
-                            <button type="submit" class="btn btn-primary">评估压力水平</button>
+                        
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="fas fa-chart-line me-2"></i>评估压力水平
+                            </button>
                         </div>
                     </form>
-                    <div id="resultContainer" class="mt-4 text-center" style="display:none;">
-                        <h4>您的压力水平评估结果：</h4>
-                        <div id="stressResult" class="display-4"></div>
+                    
+                    <div id="resultContainer" class="mt-5 text-center" style="display:none;">
+                        <h4 class="mb-4">您的压力水平评估结果：</h4>
+                        <div id="stressResult" class="display-4 mb-3"></div>
+                        
+                        <div class="stress-meter">
+                            <div id="stressIndicator" class="stress-indicator"></div>
+                        </div>
+                        
+                        <div id="adviceContainer" class="advice-card">
+                            <h5 class="mb-3"><i class="fas fa-lightbulb me-2"></i>建议</h5>
+                            <div id="stressAdvice"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -173,8 +164,6 @@
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <script src="{% static 'js/popper.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
-    <script src="{% static 'js/jquery.meanmenu.js' %}"></script>
-    <script src="{% static 'js/main.js' %}"></script>
     <script src="{% static 'js/stress-assessment.js' %}"></script>
 </body>
 </html>

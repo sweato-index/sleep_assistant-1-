@@ -1,7 +1,25 @@
 $(document).ready(function() {
+    // 压力等级建议
+    const stressAdvice = {
+        1: "您的压力水平非常低，继续保持健康的生活方式即可。",
+        2: "压力水平较低，注意保持工作和生活的平衡。",
+        3: "压力水平适中，建议每天进行15分钟的冥想放松。", 
+        4: "压力水平略高，尝试增加运动量和改善睡眠质量。",
+        5: "压力水平中等偏高，建议减少咖啡因摄入并增加休息时间。",
+        6: "压力水平较高，考虑进行深呼吸练习或寻求社交支持。",
+        7: "压力水平很高，建议咨询专业人士并调整工作节奏。",
+        8: "压力水平非常高，需要立即采取措施减压并寻求帮助。",
+        9: "压力水平极高，建议就医并制定全面的减压计划。",
+        10: "压力水平危险，请立即寻求专业医疗和心理帮助。"
+    };
+
     $('#stressForm').submit(function(e) {
         e.preventDefault();
         
+        // 显示加载状态
+        const submitBtn = $(this).find('button[type="submit"]');
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>评估中...');
+
         // 收集数值型数据
         const age = parseInt($('#age').val());
         const sleepDuration = parseFloat($('#sleepDuration').val());
@@ -39,7 +57,6 @@ $(document).ready(function() {
             occupation === 'teacher' ? 1 : 0,
             // BMI分类编码
             bmiCategory === 'normal' ? 1 : 0,
-            bmiCategory === 'normal_weight' ? 1 : 0,
             bmiCategory === 'overweight' ? 1 : 0,
             bmiCategory === 'obese' ? 1 : 0,
             // 睡眠障碍编码
@@ -54,22 +71,47 @@ $(document).ready(function() {
             data: JSON.stringify({data: inputData}),
             contentType: 'application/json',
             success: function(response) {
-                const result = response.result;
-                $('#stressResult').text(result);
-                $('#resultContainer').show();
+                const result = Math.round(response.result); // 四舍五入到整数
                 
-                // 根据结果添加样式
-                if (result >= 7) {
-                    $('#stressResult').css('color', 'red');
-                } else if (result >= 4) {
-                    $('#stressResult').css('color', 'orange');
+                // 显示结果
+                $('#stressResult').text(result);
+                $('#resultContainer').fadeIn(500);
+                
+                // 设置压力计位置 (0-100%)
+                const meterPosition = (result - 1) * (100 / 9);
+                $('#stressIndicator').css('left', meterPosition + '%');
+                
+                // 根据结果添加样式和建议
+                let resultColor, resultClass;
+                if (result >= 8) {
+                    resultColor = '#dc3545';
+                    resultClass = 'text-danger';
+                } else if (result >= 5) {
+                    resultColor = '#fd7e14';
+                    resultClass = 'text-warning';
                 } else {
-                    $('#stressResult').css('color', 'green');
+                    resultColor = '#28a745';
+                    resultClass = 'text-success';
                 }
+                
+                $('#stressResult').removeClass('text-danger text-warning text-success')
+                                 .addClass(resultClass);
+                
+                // 显示建议
+                $('#stressAdvice').html(stressAdvice[result]);
+                $('#adviceContainer').fadeIn(800);
+                
+                // 滚动到结果区域
+                $('html, body').animate({
+                    scrollTop: $('#resultContainer').offset().top - 100
+                }, 500);
             },
             error: function(xhr, status, error) {
                 console.error(error);
-                alert('评估失败，请稍后再试');
+                alert('评估失败，请检查输入数据后重试');
+            },
+            complete: function() {
+                submitBtn.prop('disabled', false).html('<i class="fas fa-chart-line me-2"></i>评估压力水平');
             }
         });
     });

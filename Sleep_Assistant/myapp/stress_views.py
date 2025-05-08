@@ -34,7 +34,7 @@ def predict_stress(request):
             
             # 获取前端数据
             data = json.loads(request.body).get('data')
-            if not data or len(data) != 24:
+            if not data or len(data) != 23:
                 return JsonResponse({'error': 'Invalid input data'}, status=400)
             
             print(f"Input data: {data}")
