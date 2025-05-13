@@ -224,6 +224,7 @@ class User(models.Model):
     email = models.CharField(unique=True, max_length=20, blank=True, null=True)
     sleep_notice = models.CharField(max_length=8, blank=True, null=True)
     wake_notice = models.CharField(max_length=8, blank=True, null=True)
+    last_login = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         managed = True

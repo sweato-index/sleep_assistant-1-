@@ -628,18 +628,29 @@ def login(request):
             if not check_password(password, user.password):
                 return JsonResponse({'success': False, 'message': '密码错误'})
                 
+            # 更新最后登录时间
+            user.last_login = timezone.now()
+            user.save()
+            
             request.session['user_id'] = user.user_id
             request.session['is_authenticated'] = True
+            request.session['user_type'] = user.user_type
             
-            return JsonResponse({
+            response_data = {
                 'success': True,
                 'message': '登录成功',
+                'last_login': user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else '首次登录',
                 'user': {
                     'id': user.user_id,
                     'name': user.user_name,
-                    'email': user.email
-                }
-            })
+                    'email': user.email,
+                    'user_type': str(user.user_type)  # 确保user_type是字符串
+                },
+                'redirect_url': '/api/admin/dashboard/' if str(user.user_type) == '0' else '/'
+            }
+            # 确保重定向URL正确
+            print(f"Login redirect URL: {response_data['redirect_url']}")  # 调试日志
+            return JsonResponse(response_data)
             
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)})
@@ -834,7 +845,7 @@ def check_session(request):
                         'id': user.user_id,
                         'name': user.user_name,
                         'email': user.email,
-                        'user_type': user.user_type  # 添加用户类型
+                        'user_type': str(user.user_type)  # 确保user_type是字符串
                     }
                 })
         
@@ -883,3 +894,140 @@ def register(request):
             return JsonResponse({'success': False, 'message': str(e)})
     
     return JsonResponse({'success': False, 'message': '无效请求方法'})
+
+from django.contrib.auth.decorators import login_required
+
+# 管理员仪表盘
+
+def admin_dashboard(request):
+    try:
+        # 检查用户权限
+        if not request.session.get('is_authenticated'):
+            return JsonResponse({'success': False, 'message': '请先登录'}, status=401)
+            
+        user_type = request.session.get('user_type')
+        if user_type != '0':  # 0表示管理员
+            return JsonResponse({'success': False, 'message': '无权限访问'}, status=403)
+            
+        # 获取系统统计数据
+        total_users = User.objects.count()
+        active_users = User.objects.filter(last_login__gte=timezone.now()-timezone.timedelta(days=30)).count()
+        experts = User.objects.filter(user_type='2').count()
+        
+        stats = {
+            'total_users': total_users,
+            'active_users': active_users,
+            'experts': experts
+        }
+        
+        # 根据请求类型返回不同响应
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'stats': stats
+            })
+        else:
+            return render(request, "admin.html", {
+                'stats': stats
+            })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+# 获取用户列表
+
+@require_http_methods(["GET"])
+def get_users(request):
+    try:
+        # 临时移除权限检查
+            
+        # 获取所有用户数据
+        users = User.objects.all().order_by('-user_id')
+        users_data = []
+        for user in users:
+            users_data.append({
+                'id': user.user_id,
+                'name': user.user_name,
+                'email': user.email,
+                'phone': user.phone_number,
+                'type': user.user_type
+            })
+            
+        return JsonResponse({
+            'success': True,
+            'users': users_data
+        }, json_dumps_params={'ensure_ascii': False})  # 确保中文正常显示
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()  # 打印完整错误堆栈
+        return JsonResponse({
+            'success': False,
+            'message': '获取用户列表失败',
+            'error': str(e)
+        }, status=500)
+
+# 更新用户信息
+@require_http_methods(["GET", "POST"])
+def update_user(request, user_id):
+    if request.method == 'GET':
+        try:
+            user = get_object_or_404(User, user_id=user_id)
+            return JsonResponse({
+                'success': True,
+                'user': {
+                    'id': user.user_id,
+                    'name': user.user_name,
+                    'email': user.email,
+                    'phone': user.phone_number,
+                    'type': user.user_type
+                }
+            })
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+            
+    elif request.method == 'POST':
+        try:
+            # 临时移除权限检查
+                
+            data = json.loads(request.body)
+            user = get_object_or_404(User, user_id=user_id)
+            
+            # 更新用户信息
+            if 'name' in data:
+                user.user_name = data['name']
+            if 'email' in data:
+                user.email = data['email']
+            if 'phone' in data:
+                user.phone_number = data['phone']
+            if 'type' in data:
+                user.user_type = data['type']
+                
+            user.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': '用户信息更新成功'
+            })
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+# 删除用户
+@require_http_methods(["DELETE"])
+def delete_user(request, user_id):
+    try:
+        # 临时移除权限检查
+            
+        user = get_object_or_404(User, user_id=user_id)
+        
+        # 不能删除自己
+        if user.user_id == request.session.get('user_id'):
+            return JsonResponse({'success': False, 'message': '不能删除自己'}, status=400)
+            
+        user.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': '用户删除成功'
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)

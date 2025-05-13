@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>睡眠助手 - 管理员面板</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <div class="sidebar">
+            <div class="logo">
+                <img src="/static/img/logo.png" alt="Logo">
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#" id="dashboard-link">仪表盘</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" id="users-link">用户管理</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" id="content-link">内容管理</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" id="settings-link">系统设置</a>
+                </li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <div class="top-bar">
+                <div class="user-info">
+                    <span id="admin-name"></span>
+                    <button class="btn btn-sm btn-outline-secondary" id="logout-btn">退出</button>
+                </div>
+            </div>
+            <div class="content-area" id="content-area">
+                <!-- 动态内容将在这里加载 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script>
+        // 全局CSRF token变量
+        const csrfToken = "{{ csrf_token }}";
+    </script>
+    <script src="/static/js/admin.js"></script>
+</body>
+</html>

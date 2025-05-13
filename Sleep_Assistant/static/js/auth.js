@@ -50,6 +50,16 @@ function handleLoginSuccess(userData) {
     authState.user = userData;
     saveAuthState();
     updateAuthUI();
+    
+    // 根据用户类型跳转不同页面
+    const userType = String(userData.user_type); // 确保user_type是字符串
+    if (userType === '0') {
+        // 管理员跳转到管理后台
+        window.location.href = '/api/admin/dashboard/';
+    } else {
+        // 普通用户跳转到首页
+        window.location.href = '/';
+    }
 }
 
 // 登出处理

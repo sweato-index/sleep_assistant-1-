@@ -36,9 +36,18 @@ from myapp.sleep_challenge_views import (
     get_user_challenges
 )
 from myapp.stress_views import predict_stress, render_stress_assessment
+from myapp.views import (
+    admin_dashboard, get_users, 
+    update_user, delete_user
+)
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # 自定义管理员路由
+    path('api/admin/dashboard/', admin_dashboard, name='admin_dashboard'),
+    path('api/admin/users/', get_users, name='get_users'),
+    path('api/admin/users/<str:user_id>/', update_user, name='update_user'),
+    path('api/admin/users/<str:user_id>/delete/', delete_user, name='delete_user'),
+    path('django-admin/', admin.site.urls),  # 修改Django admin后台路径
     path('', home, name='home'),
     path('science/', science, name='science'),
     path('tracker/', tracker, name='tracker'),
@@ -54,7 +63,7 @@ urlpatterns = [
     path('api/register/', register, name='register'),
     path('api/login/', login, name='login'),
     path('api/logout/', logout, name='logout'),
-    path('api/login/check', check_session, name='check_session'),
+    path('api/login/check/', check_session, name='check_session'),
     path('api/forum/posts/', forum_posts, name='forum_posts'),
     path('api/forum/post/create/', create_post, name='create_post'),
     path('api/forum/post/<str:post_id>/', post_detail, name='post_detail'),
