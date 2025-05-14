@@ -15,7 +15,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from myapp.views import (
     home, science, tracker, assessment, 
     advice, community, profile, blog_details,
@@ -27,7 +29,8 @@ from myapp.views import (
     join_group, leave_group, get_group_chat,
     send_group_message,expert_questions,
     create_question, question_detail,
-    answer_question
+    answer_question,get_user_profile,
+    update_user_profile, delete_account,save_reminder_settings
 )
 from myapp.sleep_challenge_views import (
     get_challenges, create_challenge,
@@ -55,6 +58,8 @@ urlpatterns = [
     path('advice/', advice, name='advice'),
     path('community/', community, name='community'),
     path('profile/', profile, name='profile'),
+    path('api/users/profile/', get_user_profile, name='get_user_profile'),
+    path('api/users/profile/update/', update_user_profile, name='update_user_profile'),
     path('blog-details/', blog_details, name='blog_details'),
     path('ai-assistant/', ai_assistant, name='ai_assistant'),
     path('stress-assessment/', render_stress_assessment, name='stress_assessment'),
@@ -93,4 +98,8 @@ urlpatterns = [
     path('api/expert/question/create/', create_question, name='create_question'),
     path('api/expert/question/<str:question_id>/', question_detail, name='question_detail'),
     path('api/expert/question/<str:question_id>/answer/', answer_question, name='answer_question'),
-]
+
+    path('api/users/delete-account/', delete_account, name='delete_account'),
+    path('api/users/reminder-settings/', save_reminder_settings, name='save_reminder_settings'),
+
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

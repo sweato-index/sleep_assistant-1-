@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
     <link rel="stylesheet" href="{% static 'css/hearder-area.css' %}">
     <link rel="stylesheet" href="{% static 'css/login-register.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         .dashboard-nav .nav-link {
             color: #666;
@@ -53,6 +54,100 @@
         .tab-pane {
             height: auto;
             overflow: visible;
+        }
+
+        /* 头像上传区域样式 */
+        .avatar-upload {
+            position: relative;
+            display: inline-block;
+        }
+
+        .avatar-upload img {
+            border: 2px solid #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .avatar-upload:hover img {
+            opacity: 0.8;
+        }
+
+        .avatar-upload label {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: #fff;
+            border-radius: 50%;
+            padding: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .avatar-upload label:hover {
+            background: #f8f9fa;
+            transform: scale(1.1);
+        }
+
+        .avatar-upload i {
+            color: #0d6efd;
+            font-size: 1.2rem;
+        }
+
+        /* 标签选择区域样式 */
+        .tag-categories .btn {
+            font-size: 0.85rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            margin: 0.2rem;
+            border: 1px solid #e0e0e0;
+            background-color: #f8f9fa;
+            color: #666;
+            transition: all 0.2s ease;
+        }
+
+        .tag-categories .btn:hover {
+            background-color: #e9ecef;
+            border-color: #d0d0d0;
+            color: #333;
+        }
+
+        .tag-categories .btn.btn-primary {
+            background-color: #e8f0fe;
+            border-color: #c2d7f0;
+            color: #1a73e8;
+        }
+
+        .tag-categories .btn.btn-primary:hover {
+            background-color: #d2e3fc;
+            border-color: #a8c7f0;
+        }
+
+        .tag-categories small {
+            color: #888;
+            font-size: 0.8rem;
+            margin-bottom: 0.3rem;
+            display: block;
+        }
+
+        .tag-categories .mb-2 {
+            margin-bottom: 1rem !important;
+        }
+
+        /* 保存标签按钮样式 */
+        .save-tags-btn {
+            font-size: 0.9rem;
+            padding: 0.4rem 1.2rem;
+            background-color: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            color: #666;
+            transition: all 0.2s ease;
+        }
+
+        .save-tags-btn:hover {
+            background-color: #e9ecef;
+            border-color: #d0d0d0;
+            color: #333;
         }
     </style>
 </head>
@@ -107,7 +202,7 @@
                           <div class="col-xl-3 col-lg-3 d-none d-lg-block">
                           <div class="header-user-profile f-right">
                               <div class="user-avatar">
-                                  <img src="{% static 'img/author-1.png' %}" alt="用户头像">
+                                  <img src="{% if user.avatar_url %}/media/{{ user.avatar_url }}{% else %}{% static 'img/author-1.png' %}{% endif %}" alt="用户头像" class="nav-avatar">
                               </div>
                               <ul class="dropdown-menu">
                                   <li><a class="dropdown-item" href="#signinModal" data-bs-toggle="modal">登录</a></li>
@@ -157,14 +252,18 @@
           <div class="d-flex align-items-end ps-4 pe-4" style="height: 100%;">
             <div style="width: 250px;"></div>
             <div class="profile-info mb-3">
-              <h5 class="mb-1" style="font-size: 1.7rem;">张三</h5>
+              <h5 id="username-display" class="mb-1" style="font-size: 1.7rem;"></h5>
             </div>
           </div>
   
           <!-- 跨区域头像 -->
           <div class="avatar-wrapper position-absolute" style="left: 40px; bottom: -70px;">
-                      <img src="{% static 'img/cat1.jpg' %}" class="rounded-circle border border-white shadow"
-                 style="width: 160px; height: 160px; object-fit: cover;">
+            <div class="position-relative d-inline-block">
+              <img src="{% if user.avatar_url %}/media/{{ user.avatar_url }}{% else %}{% static 'img/cat1.jpg' %}{% endif %}" class="rounded-circle border border-white shadow"
+                   style="width: 160px; height: 160px; object-fit: cover;">
+
+              <input type="file" id="avatarUpload" class="d-none" accept="image/*">
+            </div>
           </div>
         </div>
   
@@ -174,23 +273,32 @@
             <div style="width: 250px;"></div> <!-- 与头像保持对齐 -->
             <div class="profile-info">
               <!-- 个人标签 -->
-              <div class="mb-2">
-                <span class="badge rounded-pill bg-light text-dark me-2" style="font-size: 0.9rem; padding: 8px 15px;">
-                  懒羊羊
-                </span>
-                <!-- 可以继续添加更多标签 -->
-                <span class="badge rounded-pill bg-light text-dark me-2" style="font-size: 0.9rem; padding: 8px 15px;">
-                  爱睡觉
-                </span>
+              <div class="mb-2" id="profile-tags">
+                {% if user.tag %}
+                  {% for tag in user.tag.split %}
+                    <span class="badge rounded-pill bg-light text-dark me-2" style="font-size: 0.9rem; padding: 8px 15px;">
+                      {{ tag }}
+                    </span>
+                  {% endfor %}
+                {% else %}
+                  <span class="badge rounded-pill bg-light text-dark me-2" style="font-size: 0.9rem; padding: 8px 15px;">
+                    新用户
+                  </span>
+                {% endif %}
               </div>
               
               <!-- 个性签名 -->
-              <p class="text-muted mb-2">专注于睡眠研究的懒羊羊</p>
+              <p class="text-muted mb-2">{{ user.description|default:"这个人很懒，什么都没写~" }}</p>
               
               <!-- 其他信息 -->
               <small class="text-muted">
-                <i class="bi bi-chat-left-text me-1"></i> 00后 |
-                <i class="bi bi-geo-alt me-1"></i> 中国，上海
+                {% if user.age %}
+                  <i class="bi bi-person me-1"></i> {{ user.age }}岁 |
+                {% endif %}
+
+                {% if user.email %}
+                  <i class="bi bi-envelope me-1"></i> {{ user.email }}
+                {% endif %}
               </small>
             </div>
           </div>
@@ -209,25 +317,25 @@
             <h5 class="mb-4">用户中心</h5>
             <ul class="nav flex-column nav-pills" id="dashboard-tab" role="tablist">
               <li class="nav-item mb-3">
-                <a class="nav-link active d-flex align-items-center" id="basic-tab" data-bs-toggle="pill" data-bs-target="#basic" role="tab">
+                <a class="nav-link active d-flex align-items-center" id="basic-tab" data-bs-toggle="pill" href="#basic-panel" role="tab">
                   <i class="bi bi-person-circle me-2"></i>
                   基本信息
                 </a>
               </li>
               <li class="nav-item mb-3">
-                <a class="nav-link d-flex align-items-center" id="sleep-tab" data-bs-toggle="pill" data-bs-target="#sleep" role="tab">
+                <a class="nav-link d-flex align-items-center" id="sleep-tab" data-bs-toggle="pill" href="#sleep-panel" role="tab">
                   <i class="bi bi-moon-stars me-2"></i>
                   睡眠记录
                 </a>
               </li>
               <li class="nav-item mb-3">
-                <a class="nav-link d-flex align-items-center" id="account-tab" data-bs-toggle="pill" data-bs-target="#account" role="tab">
+                <a class="nav-link d-flex align-items-center" id="account-tab" data-bs-toggle="pill" href="#account-panel" role="tab">
                   <i class="bi bi-gear me-2"></i>
                   账号设置
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link d-flex align-items-center" id="privacy-tab" data-bs-toggle="pill" data-bs-target="#privacy" role="tab">
+                <a class="nav-link d-flex align-items-center" id="privacy-tab" data-bs-toggle="pill" href="#privacy-panel" role="tab">
                   <i class="bi bi-shield-lock me-2"></i>
                   数据与隐私
                 </a>
@@ -240,22 +348,24 @@
         <div class="col-lg-9 mt-4">
           <div class="tab-content" id="dashboard-tabContent">
             <!-- 基本信息面板 -->
-            <div class="tab-pane fade show active" id="basic" role="tabpanel">
+            <div class="tab-pane fade show active" id="basic-panel" role="tabpanel" aria-labelledby="basic-tab">
               <div class="bg-white p-4 shadow-sm" style="border-radius: 15px;">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                   <h5 class="mb-0">基本信息</h5>
-                  <button class="btn btn-primary" id="editProfileBtn">编辑资料</button>
                 </div>
 
                 <form id="profileForm">
                   <!-- 头像上传 -->
                   <div class="text-center mb-4">
-                    <div class="position-relative d-inline-block">
-                      <img src="{% static 'img/cat1.jpg' %}" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover;">
-                      <label for="avatarUpload" class="position-absolute bottom-0 end-0 bg-white rounded-circle p-2 shadow-sm" style="cursor: pointer;">
+                    <div class="avatar-upload">
+                      <img src="{% if user.avatar_url %}/media/{{ user.avatar_url }}{% else %}{% static 'img/cat1.jpg' %}{% endif %}" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover;">
+                      <label for="avatarUpload">
                         <i class="bi bi-camera"></i>
                       </label>
                       <input type="file" id="avatarUpload" class="d-none" accept="image/*">
+                    </div>
+                    <div class="mt-2">
+                      <small class="text-muted">点击相机图标更换头像</small>
                     </div>
                   </div>
 
@@ -263,17 +373,17 @@
                   <div class="row">
                     <div class="col-md-6 mb-3">
                       <label class="form-label">昵称</label>
-                      <input type="text" class="form-control" value="懒羊羊">
+                      <input type="text" class="form-control" id="nickname-input" value="懒羊羊">
                     </div>
                     <div class="col-md-6 mb-3">
                       <label class="form-label">账号</label>
-                      <input type="text" class="form-control" value="user123" disabled>
+                      <input type="text" class="form-control" id="userid-input" value="user123" disabled>
                       <div class="form-text">账号注册后不可修改</div>
                     </div>
                     <div class="col-md-6 mb-3">
                       <label class="form-label">邮箱</label>
                       <div class="input-group">
-                        <input type="email" class="form-control" value="example@email.com">
+                        <input type="email" class="form-control" id="email-input" value="example@email.com">
                         <button class="btn btn-outline-secondary" type="button">验证</button>
                       </div>
                     </div>
@@ -290,34 +400,69 @@
                         </div>
                         <div class="form-check form-check-inline">
                           <input class="form-check-input" type="radio" name="gender" id="other" value="other">
-                          <label class="form-check-label" for="other">其他</label>
+                          <label class="form-check-label" for="other">保密</label>
                         </div>
                       </div>
                     </div>
                     <div class="col-md-6 mb-3">
                       <label class="form-label">生日</label>
-                      <input type="date" class="form-control">
+                      <input type="date" class="form-control" id="birthday-input">
                     </div>
                     <div class="col-md-6 mb-3">
                       <label class="form-label">所在地</label>
-                      <input type="text" class="form-control" placeholder="省市地址">
+                      <input type="text" class="form-control" id="location-input" placeholder="省市地址">
                     </div>
                     <div class="col-12 mb-3">
                       <label class="form-label">个性签名</label>
-                      <textarea class="form-control" rows="3" maxlength="200" placeholder="写点什么来介绍自己吧（最多200字）"></textarea>
+                      <textarea class="form-control" id="description-input" rows="3" maxlength="200" placeholder="写点什么来介绍自己吧（最多200字）"></textarea>
                       <div class="form-text text-end">0/200</div>
+                    </div>
+
+                    <!-- 标签选择区域 -->
+                    <div class="col-12 mb-3">
+                      <label class="form-label">个人标签</label>
+                      <div class="tag-categories">
+                        <div class="mb-2">
+                          <small>学历</small>
+                          <div class="d-flex flex-wrap gap-2 mt-1">
+                            <button type="button" class="btn" onclick="toggleTag(this)">本科生</button>
+                            <button type="button" class="btn" onclick="toggleTag(this)">研究生</button>
+                            <button type="button" class="btn" onclick="toggleTag(this)">博士</button>
+                            <button type="button" class="btn" onclick="toggleTag(this)">博士后</button>
+                          </div>
+                        </div>
+                        <div class="mb-2">
+                          <small>科研状态</small>
+                          <div class="d-flex flex-wrap gap-2 mt-1">
+                            <button type="button" class="btn" onclick="toggleTag(this)">热爱科研</button>
+                            <button type="button" class="btn" onclick="toggleTag(this)">科研小白</button>
+                            <button type="button" class="btn" onclick="toggleTag(this)">科研大佬</button>
+                            <button type="button" class="btn" onclick="toggleTag(this)">科研新手</button>
+                          </div>
+                        </div>
+                        <div class="mb-2">
+                          <small>个性标签</small>
+                          <div class="d-flex flex-wrap gap-2 mt-1">
+                            <button type="button" class="btn" onclick="toggleTag(this)">夜猫子</button>
+                            <button type="button" class="btn" onclick="toggleTag(this)">早起鸟</button>
+                            <button type="button" class="btn" onclick="toggleTag(this)">睡眠达人</button>
+                            <button type="button" class="btn" onclick="toggleTag(this)">养生专家</button>
+                          </div>
+                        </div>
+                      </div>
+                      <button type="button" class="btn save-tags-btn mt-2" onclick="saveTags()">保存标签</button>
                     </div>
                   </div>
 
-                  <div class="text-end">
-                    <button type="submit" class="btn btn-primary px-4">保存修改</button>
+                  <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary px-4" id="saveProfileBtn">保存修改</button>
                   </div>
                 </form>
               </div>
             </div>
 
             <!-- 睡眠记录面板 -->
-            <div class="tab-pane fade" id="sleep" role="tabpanel">
+            <div class="tab-pane fade" id="sleep-panel" role="tabpanel" aria-labelledby="sleep-tab">
               <div class="bg-white p-4 shadow-sm" style="border-radius: 15px;">
                 <h5 class="mb-4">睡眠记录</h5>
 
@@ -383,7 +528,7 @@
             </div>
 
             <!-- 账号设置面板 -->
-            <div class="tab-pane fade" id="account" role="tabpanel">
+            <div class="tab-pane fade" id="account-panel" role="tabpanel" aria-labelledby="account-tab">
               <div class="bg-white p-4 shadow-sm" style="border-radius: 15px;">
                 <h5 class="mb-4">账号设置</h5>
 
@@ -423,14 +568,14 @@
                             <i class="bi bi-moon-stars me-2"></i>
                             睡觉时间提醒
                           </label>
-                          <input type="time" class="form-control" value="22:30">
+                          <input type="time" class="form-control" id="sleepTime" value="{{ sleep_notice|default:'22:30' }}">
                         </div>
                         <div class="col-md-6 mb-3">
                           <label class="form-label">
                             <i class="bi bi-sunrise me-2"></i>
                             起床时间提醒
                           </label>
-                          <input type="time" class="form-control" value="07:00">
+                          <input type="time" class="form-control" id="wakeTime" value="{{ wake_notice|default:'07:00' }}">
                         </div>
                       </div>
 
@@ -454,6 +599,42 @@
                         <button type="submit" class="btn btn-primary">保存提醒设置</button>
                       </div>
                     </form>
+                    <script>
+                    document.getElementById('reminderForm').addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        
+                        const sleepTime = document.getElementById('sleepTime').value;
+                        const wakeTime = document.getElementById('wakeTime').value;
+                        const browserNotification = document.getElementById('browserNotification').checked;
+                        const emailNotification = document.getElementById('emailNotification').checked;
+                        
+                        fetch('/api/users/reminder-settings/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}'
+                            },
+                            body: JSON.stringify({
+                                sleep_time: sleepTime,
+                                wake_time: wakeTime,
+                                browser_notification: browserNotification,
+                                email_notification: emailNotification
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('提醒设置保存成功');
+                            } else {
+                                alert('保存失败: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('保存失败，请稍后再试');
+                        });
+                    });
+                    </script>
                   </div>
                 </div>
 
@@ -473,7 +654,7 @@
             </div>
 
             <!-- 数据与隐私面板 -->
-            <div class="tab-pane fade" id="privacy" role="tabpanel">
+            <div class="tab-pane fade" id="privacy-panel" role="tabpanel" aria-labelledby="privacy-tab">
               <div class="bg-white p-4 shadow-sm" style="border-radius: 15px;">
                 <h5 class="mb-4">数据与隐私</h5>
 
@@ -554,12 +735,12 @@
             </div>
 
             <!-- 注销账号确认弹窗 -->
-            <div class="modal fade" id="deleteAccountModal" tabindex="-1">
+            <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
               <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 class="modal-title text-danger">确认注销账号？</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title text-danger" id="deleteAccountModalLabel">确认注销账号？</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
                   <div class="modal-body">
                     <div class="alert alert-warning">
@@ -684,7 +865,6 @@
       </div>
   </div>
     <!-- JS here -->
-    
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <script src="{% static 'js/popper.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
@@ -702,5 +882,315 @@
     <script src="{% static 'js/velocity.min.js' %}"></script>
     <script src="{% static 'js/velocity.ui.min.js' %}"></script>
     <script src="{% static 'js/main.js' %}"></script>
+
+    <!-- 页面底部添加 JS 脚本：动态填充数据 -->
+    <script>
+    $(document).ready(function() {
+      // 初始化 Bootstrap 标签页
+      var triggerTabList = [].slice.call(document.querySelectorAll('#dashboard-tab a'))
+      triggerTabList.forEach(function (triggerEl) {
+        var tabTrigger = new bootstrap.Tab(triggerEl)
+        triggerEl.addEventListener('click', function (event) {
+          event.preventDefault()
+          tabTrigger.show()
+        })
+      })
+
+      // 获取用户信息并填充表单
+      fetch("/api/users/profile/")
+        .then(response => response.json())
+        .then(data => {
+          console.log('User data received:', data);  // 添加调试日志
+          if (data.success) {
+            const user = data.data;
+
+            // 动态填充用户信息
+            document.getElementById("username-display").textContent = user.user_name || "未命名";
+            document.getElementById("nickname-input").value = user.user_name || "";
+            document.getElementById("userid-input").value = user.user_id || "";
+            document.getElementById("email-input").value = user.email || "";
+            document.getElementById("birthday-input").value = user.birthday || "";
+            document.getElementById("description-input").value = user.description || "";
+            document.getElementById("location-input").value = user.location || "";
+
+            // 设置所有头像图片
+            const avatarImages = document.querySelectorAll("img[class*='rounded-circle'], img.nav-avatar");
+            const defaultAvatar = "{% static 'img/author-1.png' %}";
+            avatarImages.forEach(img => {
+              if (user.avatar_url) {
+                img.src = "/media/" + user.avatar_url;
+              } else {
+                img.src = defaultAvatar;
+              }
+            });
+
+            // 性别单选
+            const genderMap = {'0': 'male', '1': 'female', '2': 'other'};
+            const genderValue = genderMap[user.gender] || '';
+            if (genderValue) {
+              document.getElementById(genderValue).checked = true;
+            }
+
+            // 初始化标签
+            selectedTags.clear();
+            
+            if (user.tag && user.tag.trim() !== '') {
+              console.log('User tags:', user.tag);  // 添加调试日志
+              const tags = user.tag.split(' ');
+              tags.forEach(tag => {
+                if (tag.trim() !== '') {  // 确保标签不为空
+                  selectedTags.add(tag);
+                  // 更新标签选择按钮的状态
+                  document.querySelectorAll('.tag-categories .btn').forEach(btn => {
+                    if (btn.textContent === tag) {
+                      btn.classList.remove('btn-outline-secondary');
+                      btn.classList.add('btn-primary');
+                    }
+                  });
+                }
+              });
+              updateTagDisplay(Array.from(selectedTags));
+            } else {
+              updateTagDisplay([]);
+            }
+          } else {
+            console.error("获取用户信息失败:", data.message);
+          }
+        })
+        .catch(err => console.error("请求失败：", err));
+
+      // 修改表单提交处理
+      $("#profileForm").on("submit", function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData();
+        const user_name = $("#nickname-input").val().trim();
+        const email = $("#email-input").val().trim();
+        const birthday = $("#birthday-input").val();
+        const description = $("#description-input").val().trim();
+        const gender = $('input[name="gender"]:checked').val();
+        const location = $("#location-input").val().trim();
+        const tags = Array.from(selectedTags).join(' ');
+
+        if (user_name) formData.append('user_name', user_name);
+        if (email) formData.append('email', email);
+        if (birthday) formData.append('birthday', birthday);
+        if (description) formData.append('description', description);
+        if (gender) formData.append('gender', gender);
+        if (location) formData.append('location', location);
+        formData.append('tag', tags);
+
+        // 获取头像文件
+        const avatarFile = $("#avatarUpload")[0].files[0];
+        if (avatarFile) {
+          formData.append('avatar', avatarFile);
+        }
+
+        console.log('Form data being sent:', {
+          user_name,
+          email,
+          birthday,
+          description,
+          gender,
+          location,
+          tags
+        });
+
+        $.ajax({
+          url: "/api/users/profile/update/",
+          method: "POST",
+          data: formData,
+          processData: false,
+          contentType: false,
+          headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+          },
+          success: function(data) {
+            console.log('Server response:', data);
+            if (data.success) {
+              // 更新显示的标签
+              updateTagDisplay(Array.from(selectedTags));
+              alert("资料更新成功！");
+              // 不要立即刷新页面，而是等待用户确认
+              if (confirm("资料已更新成功！是否刷新页面？")) {
+                window.location.reload();
+              }
+            } else {
+              alert("更新失败：" + data.message);
+            }
+          },
+          error: function(xhr, status, error) {
+            console.error('Error details:', {
+              status: status,
+              error: error,
+              response: xhr.responseText
+            });
+            alert("更新失败，请稍后重试");
+          }
+        });
+      });
+
+      // 头像上传预览
+      $("#avatarUpload").on("change", function() {
+        const file = this.files[0];
+        if (file) {
+          // 检查文件类型
+          if (!file.type.startsWith('image/')) {
+            alert('请选择图片文件！');
+            return;
+          }
+          
+          // 检查文件大小（限制为 2MB）
+          if (file.size > 2 * 1024 * 1024) {
+            alert('图片大小不能超过 2MB！');
+            return;
+          }
+
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            // 更新所有头像图片
+            $("img[class*='rounded-circle']").attr("src", e.target.result);
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    });
+    </script>
+
+    <!-- 标签相关功能 -->
+    <script>
+    // 标签相关功能
+    let selectedTags = new Set();
+
+    function toggleTag(button) {
+      const tag = button.textContent;
+      if (button.classList.contains('btn-primary')) {
+        button.classList.remove('btn-primary');
+        button.classList.add('btn-outline-secondary');
+        selectedTags.delete(tag);
+      } else {
+        button.classList.remove('btn-outline-secondary');
+        button.classList.add('btn-primary');
+        selectedTags.add(tag);
+      }
+    }
+
+    function saveTags() {
+      const tags = Array.from(selectedTags);
+      const tagString = tags.join(' ');
+      
+      console.log('Saving tags:', tags);
+      console.log('Tag string:', tagString);
+      
+      // 发送到服务器
+      $.ajax({
+        url: "/api/users/profile/update/",
+        method: "POST",
+        data: {
+          tag: tagString,
+          csrfmiddlewaretoken: "{{ csrf_token }}"
+        },
+        success: function(response) {
+          console.log('Server response:', response);
+          if (response.success) {
+            // 更新显示的标签
+            updateTagDisplay(tags);
+            alert('标签更新成功！');
+          } else {
+            alert('更新失败：' + response.message);
+          }
+        },
+        error: function(xhr, status, error) {
+          console.error('Error details:', {
+            status: status,
+            error: error,
+            response: xhr.responseText
+          });
+          alert('更新失败，请稍后重试');
+        }
+      });
+    }
+
+    // 更新标签显示的函数
+    function updateTagDisplay(tags) {
+      const tagsContainer = document.getElementById('profile-tags');
+      tagsContainer.innerHTML = '';
+      if (tags && tags.length > 0) {
+        tags.forEach(tag => {
+          if (tag.trim() !== '') {
+            const tagElement = document.createElement('span');
+            tagElement.className = 'badge rounded-pill bg-light text-dark me-2';
+            tagElement.style.fontSize = '0.9rem';
+            tagElement.style.padding = '8px 15px';
+            tagElement.textContent = tag;
+            tagsContainer.appendChild(tagElement);
+          }
+        });
+      } else {
+        const defaultTag = document.createElement('span');
+        defaultTag.className = 'badge rounded-pill bg-light text-dark me-2';
+        defaultTag.style.fontSize = '0.9rem';
+        defaultTag.style.padding = '8px 15px';
+        defaultTag.textContent = '新用户';
+        tagsContainer.appendChild(defaultTag);
+      }
+    }
+    </script>
+
+    <!-- 注销账号相关功能 -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 初始化所有模态框
+      const modals = document.querySelectorAll('.modal');
+      modals.forEach(modalElement => {
+        new bootstrap.Modal(modalElement);
+      });
+      
+      const confirmCheckbox = document.getElementById('confirmDelete');
+      const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+      const deleteAccountModal = document.getElementById('deleteAccountModal');
+      
+      // 监听复选框变化
+      confirmCheckbox.addEventListener('change', function() {
+        confirmDeleteBtn.disabled = !this.checked;
+      });
+      
+      // 监听确认注销按钮点击
+      confirmDeleteBtn.addEventListener('click', function() {
+        if (!confirmCheckbox.checked) return;
+        
+        // 显示确认对话框
+        if (confirm('确定要注销账号吗？此操作不可撤销！')) {
+          // 发送注销请求
+          $.ajax({
+            url: '/api/users/delete-account/',
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+              if (response.success) {
+                alert('账号已成功注销');
+                // 关闭模态框
+                const modal = bootstrap.Modal.getInstance(deleteAccountModal);
+                if (modal) {
+                  modal.hide();
+                }
+                // 重定向到首页
+                window.location.href = '/';
+              } else {
+                alert('注销失败：' + response.message);
+              }
+            },
+            error: function(xhr, status, error) {
+              console.error('注销账号失败:', error);
+              alert('注销失败，请稍后重试');
+            }
+          });
+        }
+      });
+    });
+    </script>
+
 </body>
 </html>

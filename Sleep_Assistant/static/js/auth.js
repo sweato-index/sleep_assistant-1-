@@ -100,7 +100,10 @@ function updateAuthUI() {
     
     if (authState.isAuthenticated && authState.user) {
         // 已登录状态
-        $userAvatar.attr('src', '/static/img/author-1.png');
+        const avatarUrl = authState.user.avatar_url 
+            ? '/media/' + authState.user.avatar_url 
+            : '/static/img/author-1.png';
+        $userAvatar.attr('src', avatarUrl);
         
         $dropdownMenu.empty();
         $dropdownMenu.append(`

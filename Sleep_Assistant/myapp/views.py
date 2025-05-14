@@ -1,17 +1,48 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
-from .models import User, Document, DocComment, DocUserAction, AiQa, SleepGroup, UserGroup, ChatHistory
+from .models import User, Document, DocComment, DocUserAction, AiQa, SleepGroup, UserGroup, ChatHistory,SleepRecord, UserChallenge, SleepChallenge
 from django.db import transaction
 from django.contrib.auth.hashers import make_password, check_password
+from django.views.decorators.csrf import csrf_exempt
 import json
+import os
+from datetime import datetime
+from django.conf import settings
 
 def get_all_user_ids(request):
     user_ids = list(User.objects.values_list('user_id', flat=True))
     user_names = list(User.objects.values_list('user_name', flat=True))
     user_emails = list(User.objects.values_list('email', flat=True))
     return JsonResponse({'user_ids': user_ids, 'user_names': user_names, 'user_emails': user_emails})
+
+#个人中心
+@require_http_methods(["GET"])
+def get_user_profile(request):
+    user_id = request.session.get('user_id')  # 假设登录后 user_id 被存入 session
+    if not user_id:
+        return JsonResponse({'success': False, 'message': '未登录'}, status=401)
+
+    user = get_object_or_404(User, user_id=user_id)
+
+    user_info = {
+        'user_id': user.user_id,
+        'user_name': user.user_name or user.phone_number,
+        'phone_number': user.phone_number,
+        'email': user.email,
+        'age': user.age,
+        'gender': user.gender,
+        'tag': user.tag,
+        'description': user.description,
+        'birthday': user.birthday.strftime('%Y-%m-%d') if user.birthday else '',
+        'sleep_notice': user.sleep_notice,
+        'wake_notice': user.wake_notice,
+        'location': user.location,
+        'avatar_url': user.avatar_url
+    }
+
+    return JsonResponse({'success': True, 'data': user_info})
 
 # 论坛帖子列表
 @require_http_methods(["GET"])
@@ -510,7 +541,26 @@ def community(request):
     return render(request, "community.html")
 
 def profile(request):
-    return render(request, "profile.html")
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return redirect('login')
+    
+    user = get_object_or_404(User, user_id=user_id)
+    context = {
+        'user': user,
+        'user_name': user.user_name or user.phone_number,
+        'phone_number': user.phone_number,
+        'email': user.email,
+        'age': user.age,
+        'gender': user.gender,
+        'tag': user.tag,
+        'description': user.description,
+        'birthday': user.birthday.strftime('%Y-%m-%d') if user.birthday else '',
+        'sleep_notice': user.sleep_notice,
+        'wake_notice': user.wake_notice,
+    }
+    return render(request, 'profile.html', context)
+
 
 def blog_details(request):
     return render(request, "blog-details.html")
@@ -894,6 +944,190 @@ def register(request):
             return JsonResponse({'success': False, 'message': str(e)})
     
     return JsonResponse({'success': False, 'message': '无效请求方法'})
+
+@csrf_exempt
+def update_user_profile(request):
+    print("收到更新用户资料的请求")
+    print("请求方法:", request.method)
+    print("POST数据:", request.POST)
+    print("FILES数据:", request.FILES)
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': '只支持POST请求'}, status=405)
+
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return JsonResponse({'success': False, 'message': '未登录'}, status=401)
+
+    try:
+        user = User.objects.get(user_id=user_id)
+        print("找到用户:", user.user_id)
+        
+        # 更新基本信息
+        if 'user_name' in request.POST:
+            user.user_name = request.POST['user_name']
+            print("更新用户名:", user.user_name)
+        if 'email' in request.POST:
+            user.email = request.POST['email']
+            print("更新邮箱:", user.email)
+        if 'gender' in request.POST:
+            # 将性别值转换为对应的数字代码
+            gender_map = {'male': '0', 'female': '1', 'other': '2'}
+            gender_value = request.POST['gender'].lower()
+            user.gender = gender_map.get(gender_value, '2')  # 默认为"其他"
+            print("更新性别:", user.gender)
+        if 'birthday' in request.POST:
+            try:
+                user.birthday = datetime.strptime(request.POST['birthday'], '%Y-%m-%d')
+                print("更新生日:", user.birthday)
+            except ValueError:
+                return JsonResponse({'success': False, 'message': '生日格式错误'}, status=400)
+        if 'description' in request.POST:
+            user.description = request.POST['description']
+            print("更新描述:", user.description)
+        if 'tag' in request.POST:
+            user.tag = request.POST['tag']
+            print("更新标签:", user.tag)
+        if 'location' in request.POST:
+            user.location = request.POST['location']
+            print("更新所在地:", user.location)
+
+        # 处理头像上传
+        if 'avatar' in request.FILES:
+            avatar = request.FILES['avatar']
+            print("处理头像上传:", avatar.name)
+            
+            # 检查文件类型
+            if not avatar.content_type.startswith('image/'):
+                return JsonResponse({'success': False, 'message': '只支持图片文件'}, status=400)
+            
+            # 生成文件名
+            ext = os.path.splitext(avatar.name)[1]
+            filename = f'avatar_{user_id}{ext}'
+            
+            # 确保上传目录存在
+            upload_dir = os.path.join(settings.MEDIA_ROOT, 'avatars')
+            os.makedirs(upload_dir, exist_ok=True)
+            
+            # 保存文件
+            file_path = os.path.join(upload_dir, filename)
+            with open(file_path, 'wb+') as destination:
+                for chunk in avatar.chunks():
+                    destination.write(chunk)
+            
+            # 更新用户头像URL（使用相对路径）
+            user.avatar_url = f'avatars/{filename}'
+            print("更新头像URL:", user.avatar_url)
+
+        print("保存用户信息")
+        user.save()
+        print("用户信息保存成功")
+        
+        return JsonResponse({
+            'success': True,
+            'message': '更新成功',
+            'data': {
+                'user_name': user.user_name,
+                'email': user.email,
+                'gender': user.gender,
+                'birthday': user.birthday.strftime('%Y-%m-%d') if user.birthday else None,
+                'description': user.description,
+                'tag': user.tag,
+                'location': user.location,
+                'avatar_url': user.avatar_url
+            }
+        })
+    except User.DoesNotExist:
+        print("用户不存在:", user_id)
+        return JsonResponse({'success': False, 'message': '用户不存在'}, status=404)
+    except Exception as e:
+        print("更新用户资料时发生错误:", str(e))
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+@require_http_methods(["POST"])
+def save_reminder_settings(request):
+    try:
+        user_id = request.session.get('user_id')
+        if not user_id:
+            return JsonResponse({'success': False, 'message': '请先登录'}, status=401)
+            
+        data = json.loads(request.body)
+        sleep_time = data.get('sleep_time')
+        wake_time = data.get('wake_time')
+        browser_notification = data.get('browser_notification', False)
+        email_notification = data.get('email_notification', False)
+        
+        user = get_object_or_404(User, user_id=user_id)
+        user.sleep_notice = sleep_time
+        user.wake_notice = wake_time
+        user.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': '提醒设置保存成功',
+            'data': {
+                'sleep_notice': user.sleep_notice,
+                'wake_notice': user.wake_notice
+            }
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+@require_http_methods(["POST"])
+def delete_account(request):
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return JsonResponse({'success': False, 'message': '未登录'}, status=401)
+
+    try:
+        with transaction.atomic():
+            # 获取用户对象
+            user = get_object_or_404(User, user_id=user_id)
+            
+            # 删除用户相关的所有数据
+            # 1. 删除睡眠记录
+            SleepRecord.objects.filter(user=user).delete()
+            
+            # 2. 删除用户参与的挑战
+            UserChallenge.objects.filter(user=user).delete()
+            
+            # 3. 删除用户创建的挑战
+            SleepChallenge.objects.filter(initiator=user).delete()
+            
+            # 4. 删除用户加入的群组
+            UserGroup.objects.filter(user=user).delete()
+            
+            # 5. 删除用户创建的群组
+            SleepGroup.objects.filter(owner=user).delete()
+            
+            # 6. 删除用户的聊天记录
+            ChatHistory.objects.filter(user=user).delete()
+            
+            # 7. 删除用户的AI问答记录
+            AiQa.objects.filter(user=user).delete()
+            
+            # 8. 删除用户的文档评论
+            DocComment.objects.filter(user=user).delete()
+            
+            # 9. 删除用户的文档操作记录
+            DocUserAction.objects.filter(user=user).delete()
+            
+            # 10. 最后删除用户本身
+            user.delete()
+            
+            # 清除session
+            request.session.flush()
+            
+            return JsonResponse({
+                'success': True,
+                'message': '账号已成功注销'
+            })
+            
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'注销账号失败：{str(e)}'
+        }, status=500)
 
 from django.contrib.auth.decorators import login_required
 

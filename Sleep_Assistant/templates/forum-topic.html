@@ -40,7 +40,7 @@
                 <div class="card mb-4" id="post-content">
                     <div class="card-body">
                         <div class="d-flex align-items-center mb-3">
-                            <img src="{% static 'img/author-1.png' %}" alt="用户头像" class="rounded-circle mr-3" width="50" id="post-author-avatar">
+                            <img src="{% if user.avatar_url %}/media/{{ user.avatar_url }}{% else %}{% static 'img/author-1.png' %}{% endif %}" alt="用户头像" class="rounded-circle mr-3" width="50" id="post-author-avatar">
                             <div>
                                 <h5 class="mb-0" id="post-author-name"></h5>
                                 <small class="text-muted" id="post-create-time"></small>

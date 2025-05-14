@@ -218,12 +218,14 @@ class User(models.Model):
     age = models.IntegerField(blank=True, null=True)
     user_type = models.CharField(max_length=2)
     gender = models.CharField(max_length=2, blank=True, null=True, db_comment='0:男,1:女,2:其他')
-    tag = models.CharField(max_length=10, blank=True, null=True)
+    tag = models.CharField(max_length=100, blank=True, null=True)
     description = models.CharField(max_length=40, blank=True, null=True)
     birthday = models.DateTimeField(blank=True, null=True)
     email = models.CharField(unique=True, max_length=20, blank=True, null=True)
     sleep_notice = models.CharField(max_length=8, blank=True, null=True)
     wake_notice = models.CharField(max_length=8, blank=True, null=True)
+    avatar_url = models.CharField(max_length=100, blank=True, null=True)
+    location = models.CharField(max_length=100, blank=True, null=True)
     last_login = models.DateTimeField(blank=True, null=True)
 
     class Meta:
