@@ -41,7 +41,8 @@ from myapp.sleep_challenge_views import (
 from myapp.stress_views import predict_stress, render_stress_assessment
 from myapp.views import (
     admin_dashboard, get_users, 
-    update_user, delete_user
+    update_user, delete_user,
+    manage_content, system_settings
 )
 
 urlpatterns = [
@@ -50,6 +51,8 @@ urlpatterns = [
     path('api/admin/users/', get_users, name='get_users'),
     path('api/admin/users/<str:user_id>/', update_user, name='update_user'),
     path('api/admin/users/<str:user_id>/delete/', delete_user, name='delete_user'),
+    path('api/admin/content/', manage_content, name='manage_content'),
+    path('api/admin/settings/', system_settings, name='system_settings'),
     path('django-admin/', admin.site.urls),  # 修改Django admin后台路径
     path('', home, name='home'),
     path('science/', science, name='science'),

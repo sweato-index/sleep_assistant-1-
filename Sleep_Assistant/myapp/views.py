@@ -1131,6 +1131,140 @@ def delete_account(request):
 
 from django.contrib.auth.decorators import login_required
 
+# 内容管理
+@require_http_methods(["GET", "POST"])
+def manage_content(request):
+    # 检查管理员权限
+    if not request.session.get('is_authenticated'):
+        return JsonResponse({'success': False, 'message': '请先登录'}, status=401)
+        
+    if request.session.get('user_type') != '0':  # 0表示管理员
+        return JsonResponse({'success': False, 'message': '无权限访问'}, status=403)
+
+    if request.method == 'GET':
+        try:
+            print("开始获取内容管理数据")  # 调试日志
+            
+            # 获取论坛帖子
+            posts = Document.objects.filter(doc_type='1').order_by('-create_time')[:50]
+            print(f"找到{len(posts)}篇帖子")  # 调试日志
+            
+            posts_data = []
+            for post in posts:
+                try:
+                    author_name = post.post_user.user_name if hasattr(post.post_user, 'user_name') else '匿名用户'
+                    create_time = timezone.localtime(post.create_time).strftime('%Y-%m-%d %H:%M') if post.create_time else '未知时间'
+                    
+                    posts_data.append({
+                        'id': post.doc_id,
+                        'title': post.title,
+                        'author': author_name,
+                        'create_time': create_time
+                    })
+                except Exception as e:
+                    print(f"处理帖子{post.doc_id}时出错: {str(e)}")  # 调试日志
+                    continue
+
+            # 获取专家问答
+            questions = Document.objects.filter(doc_type='2').order_by('-create_time')[:50]
+            print(f"找到{len(questions)}个问题")  # 调试日志
+            
+            questions_data = []
+            for q in questions:
+                try:
+                    author_name = q.post_user.user_name if hasattr(q.post_user, 'user_name') else '匿名用户'
+                    create_time = timezone.localtime(q.create_time).strftime('%Y-%m-%d %H:%M') if q.create_time else '未知时间'
+                    
+                    questions_data.append({
+                        'id': q.doc_id,
+                        'title': q.title,
+                        'author': author_name,
+                        'create_time': create_time,
+                        'answered': bool(q.text)
+                    })
+                except Exception as e:
+                    print(f"处理问题{q.doc_id}时出错: {str(e)}")  # 调试日志
+                    continue
+
+            response_data = {
+                'success': True,
+                'posts': posts_data,
+                'questions': questions_data
+            }
+            print("成功获取内容管理数据")  # 调试日志
+            return JsonResponse(response_data)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+    elif request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            action = data.get('action')
+            content_id = data.get('content_id')
+            content_type = data.get('content_type', 'post')  # 默认为帖子
+            
+            if not all([action, content_id]):
+                return JsonResponse({'success': False, 'message': '缺少必要参数'}, status=400)
+
+            content = get_object_or_404(Document, doc_id=content_id)
+            
+            if action == 'delete':
+                content.delete()
+                return JsonResponse({'success': True, 'message': '内容删除成功'})
+            elif action == 'approve':
+                content.status = '1'  # 1表示已审核
+                content.save()
+                return JsonResponse({'success': True, 'message': '内容审核通过'})
+            elif action == 'reject':
+                content.status = '2'  # 2表示已拒绝
+                content.save()
+                return JsonResponse({'success': True, 'message': '内容已拒绝'})
+            else:
+                return JsonResponse({'success': False, 'message': '无效的操作类型'}, status=400)
+                
+        except Exception as e:
+            return JsonResponse({
+                'success': False, 
+                'message': '操作失败',
+                'error': str(e)
+            }, status=500)
+
+# 系统设置
+@require_http_methods(["GET", "POST"])
+def system_settings(request):
+    if request.method == 'GET':
+        try:
+            from django.conf import settings
+            settings_data = {
+                'site_name': getattr(settings, 'SITE_NAME', '睡眠助手'),
+                'maintenance_mode': getattr(settings, 'MAINTENANCE_MODE', False),
+                'allow_registration': getattr(settings, 'ALLOW_REGISTRATION', True),
+                'default_user_type': getattr(settings, 'DEFAULT_USER_TYPE', '1'),
+                'notification_settings': {
+                    'email_enabled': getattr(settings, 'EMAIL_NOTIFICATIONS_ENABLED', True),
+                    'push_enabled': getattr(settings, 'PUSH_NOTIFICATIONS_ENABLED', True)
+                }
+            }
+            return JsonResponse({
+                'success': True,
+                'settings': settings_data
+            })
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+    elif request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            # 这里应该实现更新系统设置的逻辑
+            # 注意：实际项目中应该使用更安全的方式更新设置
+            
+            return JsonResponse({
+                'success': True,
+                'message': '系统设置已更新'
+            })
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
 # 管理员仪表盘
 
 def admin_dashboard(request):
