@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
+from django.db import models
 from .models import User, Document, DocComment, DocUserAction, AiQa, SleepGroup, UserGroup, ChatHistory,SleepRecord, UserChallenge, SleepChallenge
 from django.db import transaction
 from django.contrib.auth.hashers import make_password, check_password
@@ -525,7 +526,322 @@ def send_group_message(request, group_id):
 def home(request):
     return render(request, "index.html")
 
+@require_http_methods(["GET"])
+def science_posts(request):
+    """获取知识中心文章列表"""
+    try:
+        # 获取排序参数 (默认按最新排序)
+        sort_by = request.GET.get('sort', 'newest')
+        
+        # 构建查询
+        posts_query = Document.objects.filter(doc_type='3')
+        
+        # 应用排序
+        if sort_by == 'popular':
+            posts_query = posts_query.annotate(
+                like_count=models.Count('docuseraction', filter=models.Q(docuseraction__action_type='0')))
+            posts_query = posts_query.order_by('-like_count', '-create_time')
+        else:  # newest
+            posts_query = posts_query.order_by('-create_time')
+            
+        posts = posts_query[:20]
+        
+        # 获取用户ID用于检查点赞状态
+        user_id = request.session.get('user_id')
+        
+        posts_data = []
+        for post in posts:
+            # 检查用户是否点赞过该文章
+            liked = False
+            if user_id:
+                liked = DocUserAction.objects.filter(
+                    doc=post, 
+                    user__user_id=user_id,
+                    action_type='0'
+                ).exists()
+                
+            posts_data.append({
+                'id': post.doc_id,
+                'title': post.title,
+                'summary': post.summary,
+                'author': post.post_user.user_name if hasattr(post.post_user, 'user_name') else '匿名用户',
+                'author_id': post.post_user.user_id,
+                'create_time': timezone.localtime(post.create_time).strftime('%Y-%m-%d %H:%M') if post.create_time else '未知时间',
+                'comment_count': DocComment.objects.filter(doc=post).count(),
+                'like_count': DocUserAction.objects.filter(doc=post, action_type='0').count(),
+                'liked': liked
+            })
+            
+        return JsonResponse({
+            'success': True,
+            'posts': posts_data,
+            'sort': sort_by
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+@require_http_methods(["POST"])
+@csrf_exempt
+def create_science_post(request):
+    """创建知识中心文章"""
+    try:
+        print("Raw request data:", request.body)
+        print("Request content type:", request.content_type)
+        print("Request POST data:", request.POST)
+        print("Request FILES data:", request.FILES)
+        
+        user_id = request.session.get('user_id')
+        if not user_id:
+            return JsonResponse({'success': False, 'message': '请先登录'}, status=401)
+            
+        user = get_object_or_404(User, user_id=user_id)
+        
+        # 从FormData获取字段
+        title = request.POST.get('title', '').strip()
+        content = request.POST.get('text', '').strip()  # 注意字段名是text不是content
+        summary = request.POST.get('summary', '').strip()
+        doc_type = request.POST.get('doc_type', '3')
+        
+        print("Extracted values:", {
+            'title': title,
+            'content': content,
+            'summary': summary,
+            'doc_type': doc_type
+        })
+        
+        # 验证输入
+        if not title or not content:
+            return JsonResponse({
+                'success': False, 
+                'message': '标题和内容不能为空',
+                'received_data': {
+                    'title': title,
+                    'content': content
+                }
+            }, status=400)
+            
+        # 确保内容长度不超过数据库限制
+        if len(title) > 200:
+            return JsonResponse({
+                'success': False,
+                'message': '标题过长，请控制在200字符以内'
+            }, status=400)
+            
+        if len(content) > 10000:
+            return JsonResponse({
+                'success': False,
+                'message': '内容过长，请控制在10000字符以内'
+            }, status=400)
+            
+        # 生成新doc_id
+        last_doc = Document.objects.order_by('-doc_id').first()
+        new_id = str(int(last_doc.doc_id) + 1).zfill(10) if last_doc else '1000000000'
+        
+        # 创建文章
+        post = Document.objects.create(
+            doc_id=new_id,
+            doc_type=doc_type,  # 使用传入的doc_type
+            post_user=user,
+            title=title,
+            text=content,
+            summary=summary if summary else content[:100] + '...',
+            create_time=timezone.now()
+        )
+        
+        # 处理图片上传
+        if 'image' in request.FILES:
+            image = request.FILES['image']
+            # 确保上传目录存在
+            upload_dir = os.path.join(settings.MEDIA_ROOT, 'science_posts')
+            os.makedirs(upload_dir, exist_ok=True)
+            
+            # 生成文件名
+            ext = os.path.splitext(image.name)[1]
+            filename = f'post_{new_id}{ext}'
+            file_path = os.path.join(upload_dir, filename)
+            
+            # 保存文件
+            with open(file_path, 'wb+') as destination:
+                for chunk in image.chunks():
+                    destination.write(chunk)
+            
+            # 更新文章图片URL
+            post.image_url = f'science_posts/{filename}'
+            post.save()
+        
+        # 返回完整的文章信息
+        return JsonResponse({
+            'success': True,
+            'message': '文章创建成功',
+            'post': {
+                'id': post.doc_id,
+                'title': post.title,
+                'summary': post.summary,
+                'author': user.user_name,
+                'author_id': user.user_id,
+                'create_time': timezone.localtime(post.create_time).strftime('%Y-%m-%d %H:%M'),
+                'comment_count': 0,
+                'like_count': 0,
+                'liked': False,
+                'image_url': post.image_url if hasattr(post, 'image_url') else None
+            }
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+@require_http_methods(["GET"])
+def science_post_detail(request, post_id):
+    """获取知识中心文章详情"""
+    try:
+        user_id = request.session.get('user_id')
+        post = get_object_or_404(Document, doc_id=post_id, doc_type='3')
+        
+        # 检查用户是否点赞过该文章
+        liked = False
+        if user_id:
+            liked = DocUserAction.objects.filter(
+                doc=post, 
+                user__user_id=user_id,
+                action_type='0'
+            ).exists()
+        
+        post_data = {
+            'post': {
+                'id': post.doc_id,
+                'title': post.title,
+                'text': post.text,
+                'summary': post.summary,
+                'author': post.post_user.user_name if hasattr(post.post_user, 'user_name') else '匿名用户',
+                'create_time': timezone.localtime(post.create_time).strftime('%Y-%m-%d %H:%M') if post.create_time else '未知时间',
+                'like_count': DocUserAction.objects.filter(doc=post, action_type='0').count(),
+                'comment_count': DocComment.objects.filter(doc=post).count(),
+                'image': post.image_url if hasattr(post, 'image_url') else '/static/img/blog-1.png',
+                'liked': liked
+            }
+        }
+        return JsonResponse(post_data)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+@require_http_methods(["GET"])
+def popular_science_posts(request):
+    """获取热门知识文章"""
+    try:
+        # 获取点赞数最高的5篇文章
+        posts = Document.objects.filter(doc_type='3').annotate(
+            like_count=models.Count('docuseraction', filter=models.Q(docuseraction__action_type='0')))
+        posts = posts.order_by('-like_count', '-create_time')[:5]
+        
+        posts_data = []
+        for post in posts:
+            posts_data.append({
+                'id': post.doc_id,
+                'title': post.title,
+                'like_count': post.like_count,
+                'image': post.image_url if hasattr(post, 'image_url') else '/static/img/blog-1.png'
+            })
+            
+        return JsonResponse({
+            'posts': posts_data
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+@require_http_methods(["POST"])
+def toggle_science_like(request, post_id):
+    """点赞/取消点赞知识文章"""
+    try:
+        user_id = request.session.get('user_id')
+        if not user_id:
+            return JsonResponse({'success': False, 'message': '请先登录'}, status=401)
+            
+        post = get_object_or_404(Document, doc_id=post_id, doc_type='3')
+        user = get_object_or_404(User, user_id=user_id)
+        
+        # 生成新action_id
+        last_action = DocUserAction.objects.order_by('-action_id').first()
+        new_id = str(int(last_action.action_id) + 1).zfill(10) if last_action else '1000000000'
+        
+        action, created = DocUserAction.objects.update_or_create(
+            action_id=new_id,
+            doc=post,
+            user=user,
+            action_type='0',  # 0=点赞
+            defaults={'create_time': timezone.now()}
+        )
+        
+        if not created:
+            action.delete()
+            
+        return JsonResponse({
+            'success': True,
+            'liked': created,
+            'like_count': DocUserAction.objects.filter(doc=post, action_type='0').count()
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+@require_http_methods(["POST"])        
+def add_science_comment(request, post_id):
+    """添加知识文章评论"""
+    try:
+        data = json.loads(request.body)
+        user_id = request.session.get('user_id')
+        if not user_id:
+            return JsonResponse({'success': False, 'message': '请先登录'}, status=401)
+            
+        user = get_object_or_404(User, user_id=user_id)
+        post = get_object_or_404(Document, doc_id=post_id, doc_type='3')
+        content = data.get('content')
+        parent_id = data.get('parent_id')
+        
+        if not content:
+            return JsonResponse({'success': False, 'message': '评论内容不能为空'}, status=400)
+            
+        # 生成新comment_id
+        last_comment = DocComment.objects.order_by('-comment_id').first()
+        new_id = str(int(last_comment.comment_id) + 1).zfill(10) if last_comment else '1000000000'
+        
+        # 处理父评论
+        parent = None
+        if parent_id:
+            try:
+                parent = DocComment.objects.get(comment_id=parent_id, doc=post)
+            except DocComment.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'message': '父评论不存在'
+                }, status=400)
+        
+        # 创建评论
+        comment = DocComment.objects.create(
+            comment_id=new_id,
+            doc=post,
+            user=user,
+            comment=content,
+            create_time=timezone.now(),
+            status='1',
+            parent=parent
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': '评论添加成功',
+            'comment': {
+                'id': comment.comment_id,
+                'author': user.user_name,
+                'author_id': user.user_id,
+                'content': comment.comment,
+                'create_time': comment.create_time.strftime('%Y-%m-%d %H:%M'),
+                'parent_id': parent_id if parent_id else None,
+                'reply_count': 0
+            }
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
 def science(request):
+    """知识中心主页面"""
     return render(request, "science.html")
 
 def tracker(request):

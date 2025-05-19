@@ -30,7 +30,8 @@ from myapp.views import (
     send_group_message,expert_questions,
     create_question, question_detail,
     answer_question,get_user_profile,
-    update_user_profile, delete_account,save_reminder_settings
+    update_user_profile, delete_account,save_reminder_settings,science_posts,
+    create_science_post, science_post_detail
 )
 from myapp.sleep_challenge_views import (
     get_challenges, create_challenge,
@@ -101,6 +102,12 @@ urlpatterns = [
     path('api/expert/question/create/', create_question, name='create_question'),
     path('api/expert/question/<str:question_id>/', question_detail, name='question_detail'),
     path('api/expert/question/<str:question_id>/answer/', answer_question, name='answer_question'),
+    # 知识中心功能路由
+    path('api/science/posts/', science_posts, name='science_posts'),
+    path('api/science/post/create/', create_science_post, name='create_science_post'),
+    path('api/science/post/<str:post_id>/', science_post_detail, name='science_post_detail'),
+    path('api/science/post/<str:post_id>/like/', toggle_like, name='science_toggle_like'),
+    path('api/science/post/<str:post_id>/comment/', add_comment, name='science_add_comment'),
 
     path('api/users/delete-account/', delete_account, name='delete_account'),
     path('api/users/reminder-settings/', save_reminder_settings, name='save_reminder_settings'),

@@ -111,101 +111,88 @@
         <div class="container">
             <div class="row">
                 <div class="col-xl-8 col-lg-8">
-                    <div class="row">
-                        <!-- 文章列表 -->
-                        <div class="col-xl-6 col-md-6 col-12">
-                            <div class="single-blog">
-                                <div class="blog-image">
-                                    <a href="#"><img src="{% static 'img/blog-2.png' %}" class="img-fluid" alt=""></a>
-                                </div>
-                                <div class="blog-info">
-                                    <div class="blog-meta">
-                                        <a href="#"><i class="far fa-calendar-alt"></i> <span>2025年3月22日</span></a>
-                                        <a href="#"><i class="far fa-comments"></i> <span>10 评论</span></a>
+                    <!-- 知识中心文章列表 -->
+                    <div id="sciencePostsList" class="row">
+                        <!-- 动态加载的文章将显示在这里 -->
+                    </div>
+
+                    <!-- 文章详情视图 -->
+                    <div id="sciencePostDetail" class="row" style="display:none;">
+                        <div class="col-12">
+                            <div class="blog-info">
+                                <div class="full-blog">
+                                    <div class="blog-img">
+                                        <img id="sciencePostImage" src="" class="img-fluid" alt="">
                                     </div>
-                                    <h3 class="blog-title"><a href="#">如何改善睡眠质量</a></h3>
-                                    <p>探索科学有效的睡眠改善方法，帮助您获得更好的睡眠体验...</p>
-                                    <a href="#" class="btn blog-btn">阅读更多</a>
+                                    <div class="blog-content">
+                                        <div class="blog-meta">
+                                            <a href="#"><i class="flaticon-user"></i> <span id="sciencePostAuthor"></span></a>
+                                            <a href="#"><i class="flaticon-calendar"></i> <span id="sciencePostDate"></span></a>
+                                            <a href="#"><i class="flaticon-blogging"></i> <span id="sciencePostCommentCount"></span>条评论</a>
+                                        </div>
+                                        <h3 id="sciencePostTitle"></h3>
+                                        <div id="sciencePostContent"></div>
+                                        <div class="post-actions mt-4">
+                                            <button class="btn btn-outline-primary like-science-post-btn">
+                                                <i class="fas fa-heart"></i> 点赞 (<span id="sciencePostLikeCount">0</span>)
+                                            </button>
+                                            <button class="btn btn-outline-secondary comment-science-post-btn ml-2">
+                                                <i class="fas fa-comment"></i> 评论
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-xl-6 col-md-6 col-12">
-                            <div class="single-blog">
-                                <div class="blog-image">
-                                    <a href="#"><img src="{% static 'img/blog-1.png' %}" class="img-fluid" alt=""></a>
+
+                            <!-- 评论区域 -->
+                            <div class="comment-area mt-5">
+                                <h4>评论</h4>
+                                <div id="sciencePostComments" class="comment-list-wrapper">
+                                    <!-- 评论将动态加载到这里 -->
                                 </div>
-                                <div class="blog-info">
-                                    <div class="blog-meta">
-                                        <a href="#"><i class="far fa-calendar-alt"></i> <span>2025年3月21日</span></a>
-                                        <a href="#"><i class="far fa-comments"></i> <span>8 评论</span></a>
-                                    </div>
-                                    <h3 class="blog-title"><a href="#">睡眠周期详解</a></h3>
-                                    <p>了解睡眠的不同阶段及其对健康的影响...</p>
-                                    <a href="#" class="btn blog-btn">阅读更多</a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-xl-6 col-md-6 col-12">
-                            <div class="single-blog">
-                                <div class="blog-image">
-                                    <a href="#"><img src="{% static 'img/blog-3.png' %}" class="img-fluid" alt=""></a>
-                                </div>
-                                <div class="blog-info">
-                                    <div class="blog-meta">
-                                        <a href="#"><i class="far fa-calendar-alt"></i> <span>2025年3月20日</span></a>
-                                        <a href="#"><i class="far fa-comments"></i> <span>15 评论</span></a>
-                                    </div>
-                                    <h3 class="blog-title"><a href="#">失眠的常见原因及对策</a></h3>
-                                    <p>分析导致失眠的主要因素并提供实用解决方案...</p>
-                                    <a href="#" class="btn blog-btn">阅读更多</a>
+                                <div class="comment-form mt-4">
+                                    <h5>发表评论</h5>
+                                    <form id="scienceCommentForm">
+                                        <div class="form-group">
+                                            <textarea class="form-control" id="scienceCommentContent" rows="3" placeholder="请输入您的评论" required></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">提交评论</button>
+                                    </form>
                                 </div>
                             </div>
+                            <button id="backToPostsBtn" class="btn btn-secondary mt-4">返回文章列表</button>
                         </div>
-                        <div class="col-xl-6 col-md-6 col-12">
-                            <div class="single-blog">
-                                <div class="blog-image">
-                                    <a href="#"><img src="{% static 'img/blog-4.png' %}" class="img-fluid" alt=""></a>
-                                </div>
-                                <div class="blog-info">
-                                    <div class="blog-meta">
-                                        <a href="#"><i class="far fa-calendar-alt"></i> <span>2025年3月19日</span></a>
-                                        <a href="#"><i class="far fa-comments"></i> <span>12 评论</span></a>
-                                    </div>
-                                    <h3 class="blog-title"><a href="#">打造理想的睡眠环境</a></h3>
-                                    <p>从温度、光线到床具选择，全方位优化您的睡眠空间...</p>
-                                    <a href="#" class="btn blog-btn">阅读更多</a>
-                                </div>
-                            </div>
+                    </div>
+
+                    <!-- 新文章表单 -->
+                    <div class="row mt-4">
+                        <div class="col-12 text-center">
+                            <button id="newSciencePostBtn" class="btn btn-primary">发表新文章</button>
                         </div>
-                        <div class="col-xl-6 col-md-6 col-12">
-                            <div class="single-blog">
-                                <div class="blog-image">
-                                    <a href="#"><img src="{% static 'img/blog-5.png' %}" class="img-fluid" alt=""></a>
-                                </div>
-                                <div class="blog-info">
-                                    <div class="blog-meta">
-                                        <a href="#"><i class="far fa-calendar-alt"></i> <span>2025年3月18日</span></a>
-                                        <a href="#"><i class="far fa-comments"></i> <span>20 评论</span></a>
-                                    </div>
-                                    <h3 class="blog-title"><a href="#">睡前放松技巧</a></h3>
-                                    <p>学习有效的放松方法，帮助您更快入睡...</p>
-                                    <a href="#" class="btn blog-btn">阅读更多</a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-xl-6 col-md-6 col-12">
-                            <div class="single-blog">
-                                <div class="blog-image">
-                                    <a href="#"><img src="{% static 'img/blog-6.png' %}" class="img-fluid" alt=""></a>
-                                </div>
-                                <div class="blog-info">
-                                    <div class="blog-meta">
-                                        <a href="#"><i class="far fa-calendar-alt"></i> <span>2025年3月17日</span></a>
-                                        <a href="#"><i class="far fa-comments"></i> <span>18 评论</span></a>
-                                    </div>
-                                    <h3 class="blog-title"><a href="#">午睡的科学</a></h3>
-                                    <p>了解午睡的最佳时长和时机，最大化其健康效益...</p>
-                                    <a href="#" class="btn blog-btn">阅读更多</a>
+                    </div>
+
+                    <div id="newSciencePostForm" class="row mt-4" style="display:none;">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <form id="sciencePostForm">
+                                        <div class="form-group">
+                                            <label for="sciencePostTitle">文章标题</label>
+                                            <input type="text" class="form-control" id="form_sciencePostTitle" placeholder="请输入文章标题" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="form_sciencePostSummary">文章摘要</label>
+                                            <textarea class="form-control" id="form_sciencePostSummary" rows="2" placeholder="请输入文章摘要(50字以内)" maxlength="50" required></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="form_sciencePostContent">文章内容</label>
+                                            <textarea class="form-control" id="form_sciencePostContent" rows="5" placeholder="请输入文章内容" required></textarea>
+                                        </div>
+                                        <div class="form-group text-right">
+                                            <button type="button" id="cancelSciencePostBtn" class="btn btn-secondary mr-2">取消</button>
+                                            <button type="submit" class="btn btn-primary">提交</button>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -221,19 +208,10 @@
                             </form>
                         </div>
                         <div class="sidebar-widget-item">
-                            <h3 class="widget-title">最近文章</h3>
-                            <div class="small-post-wrapper">
-                                <div class="small-post-item d-flex">
-                                    <div class="small-post-item-image">
-                                        <img class="img-fluid" src="{% static 'img/sm-1.png' %}" alt="Recent Post">
-                                    </div>
-                                    <div class="small-post-item-content">
-                                        <h3 class="small-post-item-title"><a href="#">睡眠周期解析</a></h3>
-                                        <span class="post-date">2025年3月20日</span>
-                                    </div>
-                                </div>
-                                <!-- 更多最近文章 -->
-                            </div>
+                            <h3 class="widget-title">热门文章</h3>
+                            <ul id="popularPosts">
+                                <!-- 动态加载的热门文章将显示在这里 -->
+                            </ul>
                         </div>
                         <div class="sidebar-widget-item">
                             <h3 class="widget-title">标签</h3>
@@ -453,5 +431,6 @@
     <script src="{% static 'js/velocity.min.js' %}"></script>
     <script src="{% static 'js/velocity.ui.min.js' %}"></script>
     <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/science.js' %}"></script>
 </body>
 </html>
