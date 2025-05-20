@@ -1,25 +1,28 @@
+{% load static %}
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="zh-CN">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>Odion - Creative Agency HTML5 Template</title>
-    <meta name="description" content="">
+    <title>{{ post.title }} - 睡眠知识中心</title>
+    <meta name="description" content="{{ post.summary }}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.png">
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'img/favicon.png' %}">
 
     <!-- CSS here -->
-    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="assets/css/fontawesome-all.min.css">
-    <link rel="stylesheet" href="assets/flat-icon/flaticon.css">
-    <link rel="stylesheet" href="assets/css/meanmenu.css">
-    <link rel="stylesheet" href="assets/css/slick.css">
-    <link rel="stylesheet" href="assets/css/aos.css">
-    <link rel="stylesheet" href="assets/css/animate.css">
-    <link rel="stylesheet" href="assets/css/magnific-popup.css">
-    <link rel="stylesheet" href="assets/css/default.css">
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="stylesheet" href="assets/css/responsive.css">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/fontawesome-all.min.css' %}">
+    <link rel="stylesheet" href="{% static 'flat-icon/flaticon.css' %}">
+    <link rel="stylesheet" href="{% static 'css/meanmenu.css' %}">
+    <link rel="stylesheet" href="{% static 'css/slick.css' %}">
+    <link rel="stylesheet" href="{% static 'css/aos.css' %}">
+    <link rel="stylesheet" href="{% static 'css/animate.css' %}">
+    <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}">
+    <link rel="stylesheet" href="{% static 'css/default.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    <link rel="stylesheet" href="{% static 'css/hearder-area.css' %}">
+    <link rel="stylesheet" href="{% static 'css/login-register.css' %}">
 </head>
 <body>
     <!-- preloader  -->
@@ -37,63 +40,53 @@
 
     <!-- ============= header-area-start ==================== -->
     <header class="header-transfrent">
-    <div class="header-area">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-xl-1 col-lg-1">
-                    <div class="logo-area">
-                        <a href="index.html"><img src="assets/img/logo.png" alt=""></a>
+        <div class="header-area">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-xl-1 col-lg-1">
+                            <div class="logo-area">
+                            <a href="{% url 'home' %}"><img src="{% static 'img/logo.png' %}" alt=""></a>
+                        </div>
                     </div>
-                </div>
-                <div class="col-xl-8 col-lg-8">
-                    <div class="main-menu">
-                        <nav id="mobile-menu">
-                            <ul>
-                                <li><a href="#">Home <i class="flaticon-down-arrow"></i></a>
-                                    <ul class="sub-menu">
-                                        <li><a href="index.html">Home 1</a></li>
-                                        <li><a href="index-2.html">Home 2</a></li>
-                                    </ul>
-                                </li>
-                                <li><a href="about.html">About Us</a></li>
-                                <li><a href="#">Pages <i class="flaticon-down-arrow"></i></a>
-                                    <ul class="sub-menu">
-                                        <li><a href="team.html">Our Team</a></li>
-                                        <li><a href="pricing.html">Pricing Plan</a></li>
-                                        <li><a href="faq.html">Faq's</a></li>
-                                        <li><a href="error-404.html">404 Page</a></li>
-
-                                    </ul>
-                                </li>
-                                <li><a href="service.html">Services</a></li>
-                                <li><a href="#">Works <i class="flaticon-down-arrow"></i></a>
-                                    <ul class="sub-menu">
-                                        <li><a href="work.html">Works</a></li>
-                                        <li><a href="work-details.html">Work Details</a></li>
-                                    </ul>
-                                </li>
-                                <li><a href="#">Blog <i class="flaticon-down-arrow"></i></a>
-                                    <ul class="sub-menu">
-                                        <li><a href="blog-details.html">Blog Details</a></li>
-                                        <li><a href="blog.html">Blog Grid</a></li>
-                                        <li><a href="blog-sidebar.html">Blog Sidebar</a></li>
-                                    </ul>
-                                </li>
-                                <li><a href="contact.html">Contact</a></li>
-                            </ul>
-                        </nav>
+                    <div class="col-xl-8 col-lg-8">
+                        <div class="main-menu">
+                            <nav id="mobile-menu">
+                                <ul>
+                                    <li><a href="{% url 'home' %}">首页</a></li>
+                                    <li><a href="{% url 'science' %}">知识中心</a></li>
+                                    <li><a href="{% url 'tracker' %}">睡眠记录</a></li>
+                                    <li><a href="{% url 'assessment' %}">睡眠评分</a></li>
+                                    <li><a href="{% url 'advice' %}">睡眠助手</a></li>
+                                    <li class="dropdown">
+                                        <a href="{% url 'community' %}">交流社区 <i class="fas fa-chevron-down"></i></a>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="#forum">论坛</a></li>
+                                            <li><a href="#groups">群组</a></li>
+                                            <li><a href="#qna">专家问答</a></li>
+                                            <li><a href="#diary">睡眠日记</a></li>
+                                            <li><a href="#challenges">挑战活动</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                        <div class="mobile-menu"></div>
                     </div>
-                    <div class="mobile-menu"></div>
-                </div>
-                <div class="col-xl-3 col-lg-3 d-none d-lg-block">
-                    <div class="header-action-button f-right">
-                        <a href="#signinModal" data-toggle="modal" class="btn header-btn login active-btn">Log in</a>
-                        <a href="#signupModal" data-toggle="modal" class="btn header-btn">Sign up</a>
+                            <div class="col-xl-3 col-lg-3 d-none d-lg-block">
+                            <div class="header-user-profile f-right">
+                                <div class="user-avatar">
+                                    <img src="{% static 'img/author-1.png' %}" alt="用户头像">
+                                </div>
+                                <ul class="dropdown-menu">
+                                    <li><a href="#signinModal" data-toggle="modal">登录</a></li>
+                                    <li><a href="#signupModal" data-toggle="modal">注册</a></li>
+                                    <li><a href="{% url 'profile' %}">用户中心</a></li>
+                                </ul>
+                            </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
     </header>
     <!-- ============= header-area-end ====================== -->
 
@@ -102,12 +95,13 @@
     <div class="breadcrumbs-area text-center">
         <div class="breadcrumbs-wrapper pt-110 pb-110">
             <div class="mk-page-title">
-                <h2>Blog Details</h2>
+                <h2>{{ post.title }}</h2>
             </div>
             <nav class="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="index.html">Home</a> <i class="flaticon-right-arrow-angle"></i></li>
-                    <li class="breadcrumb-item active" aria-current="page">Blog Details</li>
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">首页</a> <i class="fas fa-chevron-right"></i></li>
+                    <li class="breadcrumb-item"><a href="{% url 'science' %}">知识中心</a> <i class="fas fa-chevron-right"></i></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ post.category }}</li>
                 </ol>
             </nav>
         </div>
@@ -122,203 +116,175 @@
                     <div class="blog-info">
                         <div class="full-blog">
                             <div class="blog-img">
-                                <img src="assets/img/full-blog.png" class="img-fluid" alt="">
+                                {% if post.image_url %}
+                                    <img src="{% static post.image_url %}" class="img-fluid" alt="{{ post.title }}">
+                                {% else %}
+                                    <img src="{% static 'img/blog-1.png' %}" class="img-fluid" alt="{{ post.title }}">
+                                {% endif %}
                             </div>
                             <div class="blog-content">
                                 <div class="blog-meta">
-                                    <a href="#"><i class="flaticon-user"></i>Admin</a>
-                                    <a href="#"><i class="flaticon-calendar"></i>20 March, 2020</a>
-                                    <a href="#"><i class="flaticon-blogging"></i>Comment  (10)</a>
+                                    <a href="#"><i class="fas fa-user"></i>{{ post.post_user.user_name }}</a>
+                                    <a href="#"><i class="fas fa-calendar-alt"></i>{{ post.create_time|date:"Y-m-d" }}</a>
+                                    <a href="#comments"><i class="fas fa-comment"></i>评论 ({{ comment_count }})</a>
+                                    <a href="#"><i class="fas fa-heart"></i>点赞 ({{ like_count }})</a>
                                 </div>
-                                <h3>How To Become Digital Marketing Plan, and a New way to the design. </h3>
-                                <p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour.There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour.There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour.There are many variations of passages of <br> <br>Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour.There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injectedhumour.<br> <br>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour.There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour.There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour.There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour.There are many<br>
-                                </p>
+                                <div class="blog-body">
+                                    {{ post.text|safe }}
+                                </div>
 
-                                <blockquote>
-                                    <p>Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour.There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected</p>
-                                    <span>ALex, CEO Our company </span>
+                                {% if post.related_images.all %}
+                                <div class="row mt-4">
+                                    {% for image in post.related_images.all %}
+                                    <div class="col-xl-6 col-lg-6 col-md-6 mb-3">
+                                        <div class="blog-sp-image">
+                                            <img src="{% static image.image %}" class="img-fluid" alt="{{ image.caption }}">
+                                            {% if image.caption %}
+                                            <p class="text-center mt-2 text-muted">{{ image.caption }}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+
+                                {% if post.quote %}
+                                <blockquote class="mt-4">
+                                    <p>{{ post.quote.text }}</p>
+                                    <span>{{ post.quote.author }}</span>
                                 </blockquote>
+                                {% endif %}
 
-                                <div class="row">
-                                    <div class="col-xl-6 col-lg-6 col-md-6">
-                                        <div class="blog-sp-image">
-                                            <img src="assets/img/blog-sp1.png" class="img-fluid" alt="">
-                                        </div>
-                                    </div>
-                                    <div class="col-xl-6 col-lg-6 col-md-6">
-                                        <div class="blog-sp-image">
-                                            <img src="assets/img/blog-sp2.png" class="img-fluid" alt="">
-                                        </div>
-                                    </div>
+                                <div class="post-tags mt-4">
+                                    <i class="fas fa-tags"></i>
+                                    {% for tag in post.tags.all %}
+                                    <a href="{% url 'tag_posts' tag.id %}" class="badge badge-pill badge-light">{{ tag.name }}</a>
+                                    {% endfor %}
                                 </div>
-                                <br>
-                                <h3>Plan your Software Project</h3>
-                                <p>humour.There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some
-                                    form, by injected humour.There are many variations of passages of Lorem Ipsum available, but the majority have suffered
-                                    alteration in some form, by injected humour.There are many variations of passages of Lorem Ipsum available, but the
-                                    majority have suffered alteration in some form, by injected humour.There are many variations of passages of Lorem Ipsum
-                                    available, but the majority have suffered alteration in some form, by injected humour.There are many<br> <br> humour.There are many variations of passages of Lorem Ipsum available, but themajority have suffered alteration in some form, by injected humour.There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour.There are many
-                                </p>
 
                             </div>
                         </div>
                     </div>
-                    <div class="comment-area">
-                        <h4>Comment</h4>
+                    <div class="comment-area" id="comments">
+                        <h4>评论 ({{ post.comments.count }})</h4>
                         <div class="comment-list-wrapper">
+                            {% for comment in comments %}
                             <div class="comment-list d-flex mb-35">
-                                <div class="author-image">
-                                    <img src="assets/img/author-1.png" class="img-fluid" alt="">
+                                <div class="author-image mr-3">
+                                    <img src="{% static comment.user.avatar|default:'img/author-1.png' %}" class="img-fluid rounded-circle" style="width: 50px; height: 50px;" alt="{{ comment.user.user_name }}">
                                 </div>
-                                <div class="comment-text">
-                                    <div class="d-flex mb-10">
-                                        <h5 class="author-name">Nafisl Esn</h5>
-                                        <div class="comment-date"><a href=""><i class="flaticon-calendar"></i> March 17, 2020</a></div>
+                                <div class="comment-text flex-grow-1">
+                                    <div class="d-flex mb-2">
+                                        <h6 class="author-name mb-0">{{ comment.user.user_name }}</h6>
+                                        <div class="comment-date ml-2"><small class="text-muted"><i class="fas fa-calendar-alt"></i> {{ comment.create_time|date:"Y-m-d H:i" }}</small></div>
                                     </div>
-                                    <p>humour.There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour.</p>
-                                    <a href="#" class="comment-reply-link">Reply</a>
+                                    <div class="comment-content mb-2">{{ comment.comment }}</div>
+                                    <a href="#comment-form" class="comment-reply-link text-muted" data-reply-to="{{ comment.id }}"><small>回复</small></a>
                                 </div>
                             </div>
-
-                            <div class="comment-list d-flex mb-35">
-                                <div class="author-image">
-                                    <img src="assets/img/author-2.png" class="img-fluid" alt="">
-                                </div>
-                                <div class="comment-text">
-                                    <div class="d-flex mb-10">
-                                        <h5 class="author-name">Alex Eln</h5>
-                                        <div class="comment-date"><a href=""><i class="flaticon-calendar"></i> March 17, 2020</a></div>
-                                    </div>
-                                    <p>humour.There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour.</p>
-                                    <a href="#" class="comment-reply-link">Reply</a>
-                                </div>
+                            {% empty %}
+                            <div class="alert alert-info">
+                                暂无评论，快来发表你的看法吧！
                             </div>
-
-                            <div class="comment-list d-flex mb-35">
-                                <div class="author-image">
-                                    <img src="assets/img/author-3.png" class="img-fluid" alt="">
-                                </div>
-                                <div class="comment-text">
-                                    <div class="d-flex mb-10">
-                                        <h5 class="author-name">Dr. Noor</h5>
-                                        <div class="comment-date"><a href=""><i class="flaticon-calendar"></i> March 17, 2020</a></div>
-                                    </div>
-                                    <p>humour.There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour.</p>
-                                    <a href="#" class="comment-reply-link">Reply</a>
-                                </div>
-                            </div>
-
+                            {% endfor %}
                         </div>
                     </div>
-                    <div class="comment-form mt-100 mb-50">
-                        <h4 class="mb-50">Leave A Reply</h4>
-                        <form action="#" method="post">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <input required="" type="text" class="form-control" id="name" placeholder="Name">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <input required="" type="email" class="form-control" id="email2" placeholder="Email">
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="comment-form mt-100 mb-50" id="comment-form">
+                        <h4 class="mb-50">发表评论</h4>
+                        <form id="science-comment-form" method="post" action="{% url 'science_add_comment' post_id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="parent_id" id="parent_id" value="">
                             <div class="form-group">
-                                <input type="text" class="form-control" id="website" placeholder="Subject">
+                                <textarea required class="form-control" id="comment-text" name="text" rows="4" placeholder="写下你的评论..."></textarea>
                             </div>
-                            <div class="form-group">
-                                <textarea required="" class="form-control" id="comment" rows="4" placeholder="Comment"></textarea>
-                            </div>
-                            <a href="#" class="btn commnet-btn mt-20">Submit</a>
+                            <button type="button" class="btn commnet-btn mt-20" onclick="submitComment()">提交评论</button>
                         </form>
+                        <script>
+                        function submitComment() {
+                            const form = document.getElementById('science-comment-form');
+                            const formData = new FormData(form);
+                            
+                            fetch(form.action, {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                                }
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok');
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                if(data.success) {
+                                    location.reload();
+                                } else {
+                                    alert('评论失败: ' + data.message);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('评论提交出错: ' + error.message);
+                            });
+                        }
+                        </script>
                     </div>
                 </div>
                 <div class="col-xl-4 col-lg-4">
                     <div class="sidebar-widget">
                         <div class="sidebar-widget-item">
-                            <h3 class="widget-title">Search</h3>
-                            <form class="post-search" action="#" method="post">
-                                <input type="text" name="search" class="search">
-                                <button><i class="flaticon-magnifying-glass"></i></button>
+                            <h3 class="widget-title">搜索睡眠知识</h3>
+                            <form class="post-search" action="{% url 'search_posts' %}" method="get">
+                                <input type="text" name="q" class="search" placeholder="输入关键词...">
+                                <button type="submit"><i class="fas fa-search"></i></button>
                             </form>
                         </div>
                         <div class="sidebar-widget-item">
-                            <h3 class="widget-title">Recent Post</h3>
+                            <h3 class="widget-title">最近文章</h3>
                             <div class="small-post-wrapper">
+                                {% for recent_post in recent_posts %}
                                 <div class="small-post-item d-flex">
                                     <div class="small-post-item-image">
-                                        <img class="img-fluid" src="assets/img/sm-1.png" alt="Recent Post">
+                                        {% if recent_post.image_url %}
+                                            <img class="img-fluid" src="{% static recent_post.image_url %}" alt="{{ recent_post.title }}">
+                                        {% else %}
+                                            <img class="img-fluid" src="{% static 'img/blog-1.png' %}" alt="{{ recent_post.title }}">
+                                        {% endif %}
                                     </div>
                                     <div class="small-post-item-content">
-                                        <h3 class="small-post-item-title"><a href="blog-details.html">Why UIUX Design is Important</a></h3>
-                                        <span class="post-date">10 November 2020</span>
+                                        <h3 class="small-post-item-title"><a href="{% url 'blog_detail' recent_post.id %}">{{ recent_post.title }}</a></h3>
+                                        <span class="post-date">{{ recent_post.create_time|date:"Y-m-d" }}</span>
                                     </div>
                                 </div>
-                                <div class="small-post-item d-flex">
-                                    <div class="small-post-item-image">
-                                        <img class="img-fluid" src="assets/img/sm-2.png" alt="Recent Post">
-                                    </div>
-                                    <div class="small-post-item-content">
-                                        <h3 class="small-post-item-title"><a href="blog-details.html">What Apps Development?</a></h3>
-                                        <span class="post-date">10 November 2020</span>
-                                    </div>
-                                </div>
-                                <div class="small-post-item d-flex">
-                                    <div class="small-post-item-image">
-                                        <img class="img-fluid" src="assets/img/sm-3.png" alt="Recent Post">
-                                    </div>
-                                    <div class="small-post-item-content">
-                                        <h3 class="small-post-item-title"><a href="blog-details.html">Why UIUX Design is Important</a></h3>
-                                        <span class="post-date">10 November 2020</span>
-                                    </div>
-                                </div>
-                                <div class="small-post-item d-flex">
-                                    <div class="small-post-item-image">
-                                        <img class="img-fluid" src="assets/img/sm-4.png" alt="Recent Post">
-                                    </div>
-                                    <div class="small-post-item-content">
-                                        <h3 class="small-post-item-title"><a href="blog-details.html">10 is Important</a></h3>
-                                        <span class="post-date">10 November 2020</span>
-                                    </div>
-                                </div>
-                                <div class="small-post-item d-flex">
-                                    <div class="small-post-item-image">
-                                        <img class="img-fluid" src="assets/img/sm-5.png" alt="Recent Post">
-                                    </div>
-                                    <div class="small-post-item-content">
-                                        <h3 class="small-post-item-title"><a href="blog-details.html">Why UIUX Design is Important</a></h3>
-                                        <span class="post-date">10 November 2020</span>
-                                    </div>
-                                </div>
+                                {% empty %}
+                                <div class="alert alert-info">暂无其他文章</div>
+                                {% endfor %}
                             </div>
                         </div>
                         <div class="sidebar-widget-item">
-                            <h3 class="widget-title">Tag</h3>
+                            <h3 class="widget-title">热门标签</h3>
                             <div class="related-tag justify-content">
-                                <a href="#" class="btn tag-btn">UI/UX</a>
-                                <a href="#" class="btn tag-btn">UI/UX-Design</a>
-                                <a href="#" class="btn tag-btn">App design</a>
-                                <a href="#" class="btn tag-btn">UI Design </a>
-                                <a href="#" class="btn tag-btn">Design</a>
-                                <a href="#" class="btn tag-btn">UX Design</a>
-                                <a href="#" class="btn tag-btn">SEO</a>
-                                <a href="#" class="btn tag-btn">Creative</a>
-                                <a href="#" class="btn tag-btn">Apps for IOS</a>
-                                <a href="#" class="btn tag-btn">Web design</a>
-                                <a href="#" class="btn tag-btn">Product</a>
-                                <a href="#" class="btn tag-btn">UI/UX-Design</a>
+                                {% for tag in popular_tags %}
+                                <a href="{% url 'tag_posts' tag.id %}" class="btn tag-btn">{{ tag.name }}</a>
+                                {% empty %}
+                                <span class="text-muted">暂无标签</span>
+                                {% endfor %}
                             </div>
                         </div>
                         <div class="sidebar-widget-item">
-                            <h3 class="widget-title">Categories</h3>
+                            <h3 class="widget-title">分类</h3>
                             <ul class="categories">
-                                <li><a href="#"><i class="flaticon-right-arrow-angle"></i>November, 2020 (34)</a></li>
-                                <li><a href="#"><i class="flaticon-right-arrow-angle"></i>October, 2020 (34)</a></li>
-                                <li><a href="#"><i class="flaticon-right-arrow-angle"></i>September, 2020 (33)</a></li>
-                                <li><a href="#"><i class="flaticon-right-arrow-angle"></i>August, 2020 (34)</a></li>
-                                <li><a href="#"><i class="flaticon-right-arrow-angle"></i>July, 2020 (34)</a></li>
+                                {% for category in categories %}
+                                <li>
+                                    <a href="{% url 'category_posts' category.id %}">
+                                        <i class="fas fa-angle-right"></i>{{ category.name }} ({{ category.post_count }})
+                                    </a>
+                                </li>
+                                {% empty %}
+                                <li class="text-muted">暂无分类</li>
+                                {% endfor %}
                             </ul>
                         </div>
                     </div>
@@ -328,96 +294,91 @@
     </div>
     <!-- ============= blog-filtering-area-end ============== -->
 
-    <!-- ============= fotter-area-start ================ -->
-    <div class="fotter-area black-bg pt-100 pb-3">
+    <!-- ============= footer-area-start ================ -->
+    <div class="footer-area black-bg pt-100 pb-3">
         <div class="container">
             <div class="row">
                 <div class="col-xl-3 col-lg-3 col-md-6 col-12">
-                    <div class="fotter-widget">
-                        <div class="fotter-logo">
-                            <a href="index.html"><img src="assets/img/logo-white.png" alt=""></a>
+                    <div class="footer-widget">
+                        <div class="footer-logo">
+                            <a href="{% url 'home' %}"><img src="{% static 'img/logo-white.png' %}" alt=""></a>
                         </div>
-                        <p>There are many variations of passages of Lorem
-                            Ipsum available, but the majority have suffered
-                            alteration in some for.</p>
+                        <p>睡眠助手 - 为您提供专业的睡眠健康知识和个性化睡眠改善方案</p>
                         <div class="social-icon">
                             <ul>
-                                <li><a href="#"><i class="flaticon-facebook"></i></a></li>
-                                <li><a href="#"><i class="flaticon-twitter"></i></a></li>
-                                <li><a href="#"><i class="flaticon-instagram"></i></a></li>
-                                <li><a href="#"><i class="flaticon-linkedin"></i></a></li>
+                                <li><a href="#"><i class="fab fa-weixin"></i></a></li>
+                                <li><a href="#"><i class="fab fa-weibo"></i></a></li>
+                                <li><a href="#"><i class="fab fa-qq"></i></a></li>
+                                <li><a href="#"><i class="fab fa-github"></i></a></li>
                             </ul>
                         </div>
                     </div>
                 </div>
                 <div class="col-xl-2 col-lg-2 col-md-3 col-6">
-                    <div class="fotter-widget ">
-                        <div class="fotter-subtitle">
-                            <h5>Quick Link</h5>
+                    <div class="footer-widget">
+                        <div class="footer-subtitle">
+                            <h5>快速链接</h5>
                         </div>
-                        <div class="fotter-link">
+                        <div class="footer-link">
                             <ul>
-                                <li><a href="#">About Us</a></li>
-                                <li><a href="#">Why Choose Us</a></li>
-                                <li><a href="#">Our Services</a></li>
-                                <li><a href="#">Our Latest Blog</a></li>
-                                <li><a href="#">Cyber Security</a></li>
+                                <li><a href="{% url 'home' %}">首页</a></li>
+                                <li><a href="{% url 'science' %}">知识中心</a></li>
+                                <li><a href="{% url 'tracker' %}">睡眠记录</a></li>
+                                <li><a href="{% url 'assessment' %}">睡眠评估</a></li>
+                                <li><a href="{% url 'community' %}">交流社区</a></li>
                             </ul>
                         </div>
                     </div>
                 </div>
                 <div class="col-xl-2 col-lg-2 col-md-3 col-6">
-                    <div class="fotter-widget ">
-                        <div class="fotter-subtitle">
-                            <h5>Service</h5>
+                    <div class="footer-widget">
+                        <div class="footer-subtitle">
+                            <h5>睡眠知识</h5>
                         </div>
-                        <div class="fotter-link">
+                        <div class="footer-link">
                             <ul>
-                                <li><a href="#">Apps Development</a></li>
-                                <li><a href="#">Cloud Computing</a></li>
-                                <li><a href="#">UIUX Design</a></li>
-                                <li><a href="#">IT Consulting</a></li>
-                                <li><a href="#">Cyber Security</a></li>
+                                <li><a href="#">失眠改善</a></li>
+                                <li><a href="#">睡眠周期</a></li>
+                                <li><a href="#">睡眠姿势</a></li>
+                                <li><a href="#">睡眠环境</a></li>
+                                <li><a href="#">睡眠障碍</a></li>
                             </ul>
                         </div>
                     </div>
                 </div>
                 <div class="col-xl-2 col-lg-2 col-md-3 col-6">
-                    <div class="fotter-widget ">
-                        <div class="fotter-subtitle">
-                            <h5>Contact Us</h5>
+                    <div class="footer-widget">
+                        <div class="footer-subtitle">
+                            <h5>联系我们</h5>
                         </div>
                         <div class="contact-info">
                             <ul>
-                                <li><i class="flaticon-call"></i>+1254 6587 2354</li>
-                                <li><i class="flaticon-mail"></i>info@example.com</li>
-                                <li><i class="flaticon-pin"></i>E. Union Ave Suite 1100.
-                                    Denver, CO 3247 </li>
+                                <li><i class="fas fa-phone"></i>400-123-4567</li>
+                                <li><i class="fas fa-envelope"></i>support@sleepassistant.com</li>
+                                <li><i class="fas fa-map-marker-alt"></i>上海市浦东新区张江高科技园区</li>
                             </ul>
                         </div>
                     </div>
                 </div>
                 <div class="col-xl-3 col-lg-3 col-md-6 col-12">
-                    <div class="fotter-widget ">
-                        <div class="fotter-subtitle">
-                            <h5>Newsletter</h5>
+                    <div class="footer-widget">
+                        <div class="footer-subtitle">
+                            <h5>订阅我们</h5>
                         </div>
-                        <p>There are many variations of passages of
-                            Lorem Ipsum available, but the majority
-                            have suffered </p>
-                        <div class="subscibe-area">
-                            <input type="text" placeholder="Your Email Address">
-                            <a href="#" class="btn subscribe-btn">Subscribe</a>
+                        <p>订阅我们的电子报，获取最新的睡眠健康知识和优惠活动</p>
+                        <div class="subscribe-area">
+                            <input type="text" placeholder="您的邮箱地址">
+                            <a href="#" class="btn subscribe-btn">订阅</a>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="copy-right-area text-center mt-40">
-                <span>Copyright 2025 © All Rights Reserved. <a target="_blank" href="https://www.mobanwang.com/" title="网站模板">网站模板</a></span>
+            <div class="copyright-area text-center mt-40">
+                <span>Copyright © 2025 睡眠助手 版权所有</span>
             </div>
         </div>
     </div>
-    <!-- ============= fotter-area-end ================== -->
+    <!-- ============= footer-area-end ================== -->
 
 
     <!-- ============= Login & Register Modal Start ================ -->
@@ -426,24 +387,31 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title">
-                        Login
+                        用户登录
                     </h4>
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         ×
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form method="post" action="#" class="form-signin-signup">
-                        <label for="inputEmail" class="sr-only">Email Address</label>
-                        <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required>
-                        <label for="inputPassword" class="sr-only">Password</label>
-                        <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
-                        <div class="checkbox mb-3">
-                            <label>
-                                <input type="checkbox" value="remember-me"> Remember me
-                            </label>
+                    <form method="post" action="{% url 'login' %}" class="form-signin-signup">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="inputEmail">邮箱/用户名</label>
+                            <input type="text" id="inputEmail" class="form-control" name="username" placeholder="请输入邮箱或用户名" required>
                         </div>
-                        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+                        <div class="form-group">
+                            <label for="inputPassword">密码</label>
+                            <input type="password" id="inputPassword" class="form-control" name="password" placeholder="请输入密码" required>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input" id="rememberMe" name="remember_me">
+                            <label class="form-check-label" for="rememberMe">记住我</label>
+                        </div>
+                        <button class="btn btn-primary btn-block" type="submit">登录</button>
+                        <div class="text-center mt-3">
+                            <a href="#forgotPasswordModal" data-toggle="modal" data-dismiss="modal">忘记密码?</a>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -454,30 +422,35 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title">
-                        Signup
+                        用户注册
                     </h4>
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
                         ×
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form method="post" action="#" class="form-signin-signup">
-                        <label for="first_name" class="sr-only">First Name</label>
-                        <input type="text" id="first_name" class="form-control" placeholder="First Name" required >
-                        <label for="last_name" class="sr-only">Last Name</label>
-                        <input type="text" id="last_name" class="form-control" placeholder="Last Name" required >
-
-                        <label for="email" class="sr-only">Email</label>
-                        <input type="email" id="email" class="form-control" placeholder="Email Address" required >
-
-                        <label for="username" class="sr-only">Username</label>
-                        <input type="text" id="username" class="form-control" placeholder="Username" required >
-
-                        <label for="Password" class="sr-only">Password</label>
-                        <input type="password" id="Password" class="form-control" placeholder="Password" required>
-                        <label for="confirm_password" class="sr-only">Confirm Password</label>
-                        <input type="password" id="confirm_password" class="form-control" placeholder="Confirm Password" required>
-                        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign up</button>
+                    <form method="post" action="{% url 'register' %}" class="form-signin-signup">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="username">用户名</label>
+                            <input type="text" id="username" class="form-control" name="username" placeholder="请输入用户名" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">邮箱</label>
+                            <input type="email" id="email" class="form-control" name="email" placeholder="请输入邮箱" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="Password">密码</label>
+                            <input type="password" id="Password" class="form-control" name="password1" placeholder="请输入密码" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm_password">确认密码</label>
+                            <input type="password" id="confirm_password" class="form-control" name="password2" placeholder="请再次输入密码" required>
+                        </div>
+                        <button class="btn btn-primary btn-block" type="submit">注册</button>
+                        <div class="text-center mt-3">
+                            已有账号? <a href="#signinModal" data-toggle="modal" data-dismiss="modal">立即登录</a>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -492,20 +465,23 @@
     <!-- End scroll bottom to top -->
 
     <!-- JS here -->
-    <script src="assets/js/jquery.min.js"></script>
-    <script src="assets/js/popper.min.js"></script>
-    <script src="assets/js/bootstrap.min.js"></script>
-    <script src="assets/js/jquery.meanmenu.js"></script>
-    <script src="assets/js/slick.min.js"></script>
-    <script src="assets/js/aos.js"></script>
-    <script src="assets/js/jquery.counterup.min.js"></script>
-    <script src="assets/js/isotope.pkgd.min.js"></script>
-    <script src="assets/js/wow.min.js"></script>
-    <script src="assets/js/jquery.magnific-popup.min.js"></script>
-    <script src="assets/js/waypoints.min.js"></script>
-    <script src="assets/js/plugins.js"></script>
-    <script src="assets/js/velocity.min.js"></script>
-    <script src="assets/js/velocity.ui.min.js"></script>
-    <script src="assets/js/main.js"></script>
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/jquery.meanmenu.js' %}"></script>
+    <script src="{% static 'js/auth.js' %}"></script>
+    <script src="{% static 'js/login-register.js' %}"></script>
+    <script src="{% static 'js/slick.min.js' %}"></script>
+    <script src="{% static 'js/aos.js' %}"></script>
+    <script src="{% static 'js/jquery.counterup.min.js' %}"></script>
+    <script src="{% static 'js/isotope.pkgd.min.js' %}"></script>
+    <script src="{% static 'js/wow.min.js' %}"></script>
+    <script src="{% static 'js/jquery.magnific-popup.min.js' %}"></script>
+    <script src="{% static 'js/waypoints.min.js' %}"></script>
+    <script src="{% static 'js/plugins.js' %}"></script>
+    <script src="{% static 'js/velocity.min.js' %}"></script>
+    <script src="{% static 'js/velocity.ui.min.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/science.js' %}"></script>
 </body>
 </html>

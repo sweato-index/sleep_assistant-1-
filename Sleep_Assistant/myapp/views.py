@@ -726,6 +726,40 @@ def science_post_detail(request, post_id):
         return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
 @require_http_methods(["GET"])
+@require_http_methods(["GET"])
+def search_posts(request):
+    """搜索文章"""
+    try:
+        query = request.GET.get('q', '').strip()
+        if not query:
+            return JsonResponse({'posts': []})
+            
+        # 搜索标题和内容中包含关键词的文章
+        posts = Document.objects.filter(
+            models.Q(title__icontains=query) | 
+            models.Q(text__icontains=query),
+            doc_type='3'  # 只搜索知识文章
+        ).order_by('-create_time')[:20]
+        
+        posts_data = []
+        for post in posts:
+            posts_data.append({
+                'id': post.doc_id,
+                'title': post.title,
+                'summary': post.summary,
+                'author': post.post_user.user_name if hasattr(post.post_user, 'user_name') else '匿名用户',
+                'create_time': timezone.localtime(post.create_time).strftime('%Y-%m-%d %H:%M') if post.create_time else '未知时间',
+                'comment_count': DocComment.objects.filter(doc=post).count(),
+                'like_count': DocUserAction.objects.filter(doc=post, action_type='0').count()
+            })
+            
+        return JsonResponse({
+            'success': True,
+            'posts': posts_data
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
 def popular_science_posts(request):
     """获取热门知识文章"""
     try:
@@ -787,22 +821,42 @@ def toggle_science_like(request, post_id):
 def add_science_comment(request, post_id):
     """添加知识文章评论"""
     try:
-        data = json.loads(request.body)
+        print(f"收到评论请求，post_id: {post_id}")  # 调试日志
+        
+        # 根据Content-Type处理不同格式的请求
+        if request.content_type == 'application/json':
+            try:
+                data = json.loads(request.body)
+                print(f"JSON请求数据: {data}")  # 调试日志
+                content = data.get('content') or data.get('text')
+                parent_id = data.get('parent_id')
+            except json.JSONDecodeError as e:
+                return JsonResponse({
+                    'success': False,
+                    'message': '无效的JSON数据'
+                }, status=400)
+        else:  # 处理FormData/multipart
+            data = request.POST
+            print(f"FormData请求数据: {data}")  # 调试日志
+            content = data.get('text')  # 表单字段名是text
+            parent_id = data.get('parent_id')
+            
         user_id = request.session.get('user_id')
         if not user_id:
+            print("用户未登录")  # 调试日志
             return JsonResponse({'success': False, 'message': '请先登录'}, status=401)
             
         user = get_object_or_404(User, user_id=user_id)
         post = get_object_or_404(Document, doc_id=post_id, doc_type='3')
-        content = data.get('content')
-        parent_id = data.get('parent_id')
         
         if not content:
+            print("评论内容为空")  # 调试日志
             return JsonResponse({'success': False, 'message': '评论内容不能为空'}, status=400)
             
         # 生成新comment_id
         last_comment = DocComment.objects.order_by('-comment_id').first()
         new_id = str(int(last_comment.comment_id) + 1).zfill(10) if last_comment else '1000000000'
+        print(f"生成comment_id: {new_id}")  # 调试日志
         
         # 处理父评论
         parent = None
@@ -816,29 +870,39 @@ def add_science_comment(request, post_id):
                 }, status=400)
         
         # 创建评论
-        comment = DocComment.objects.create(
-            comment_id=new_id,
-            doc=post,
-            user=user,
-            comment=content,
-            create_time=timezone.now(),
-            status='1',
-            parent=parent
-        )
-        
-        return JsonResponse({
-            'success': True,
-            'message': '评论添加成功',
-            'comment': {
-                'id': comment.comment_id,
-                'author': user.user_name,
-                'author_id': user.user_id,
-                'content': comment.comment,
-                'create_time': comment.create_time.strftime('%Y-%m-%d %H:%M'),
-                'parent_id': parent_id if parent_id else None,
-                'reply_count': 0
-            }
-        })
+        try:
+            comment = DocComment.objects.create(
+                comment_id=new_id,
+                doc=post,
+                user=user,
+                comment=content,
+                create_time=timezone.now(),
+                status='1',
+                parent=parent
+            )
+            print(f"评论创建成功: {comment.comment_id}")  # 调试日志
+            
+            return JsonResponse({
+                'success': True,
+                'message': '评论添加成功',
+                'comment': {
+                    'id': comment.comment_id,
+                    'author': user.user_name,
+                    'author_id': user.user_id,
+                    'content': comment.comment,
+                    'create_time': comment.create_time.strftime('%Y-%m-%d %H:%M'),
+                    'parent_id': parent_id if parent_id else None,
+                    'reply_count': 0
+                }
+            })
+            
+        except Exception as e:
+            print(f"创建评论失败: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': '评论创建失败',
+                'error': str(e)
+            }, status=500)
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
@@ -880,8 +944,41 @@ def profile(request):
     return render(request, 'profile.html', context)
 
 
-def blog_details(request):
-    return render(request, "blog-details.html")
+def blog_details(request, doc_id):
+    try:
+        # Get the blog post by doc_id
+        post = get_object_or_404(Document, doc_id=doc_id, doc_type='3')  # doc_type='3' for blog posts
+        
+        # Get related posts (same category or tags)
+        related_posts = Document.objects.filter(
+            doc_type='3'
+        ).exclude(doc_id=post.doc_id).order_by('-create_time')[:3]
+        
+        # Get all comments for this post
+        comments = DocComment.objects.filter(doc=post).order_by('create_time')
+        comment_count = comments.count()
+        
+        # Check if user liked this post
+        liked = False
+        if request.session.get('user_id'):
+            liked = DocUserAction.objects.filter(
+                doc=post,
+                user__user_id=request.session['user_id'],
+                action_type='0'  # 0=like
+            ).exists()
+        
+        context = {
+            'post': post,
+            'post_id': post.doc_id,  # Explicitly pass doc_id as post_id
+            'related_posts': related_posts,
+            'comments': comments,
+            'comment_count': comment_count,
+            'liked': liked,
+            'like_count': DocUserAction.objects.filter(doc=post, action_type='0').count()
+        }
+        return render(request, "blog-details.html", context)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
 def ai_assistant(request):
     return render(request, "ai-assistant.html")

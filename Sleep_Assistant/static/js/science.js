@@ -58,25 +58,25 @@ $(document).ready(function() {
     function renderSciencePosts(posts) {
         let html = '';
         posts.forEach(post => {
-            html += `
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="card science-post-card h-100" data-id="${post.id}">
-                        <img src="/static/img/blog-${Math.floor(Math.random() * 6) + 1}.png" class="card-img-top" alt="文章图片">
-                        <div class="card-body">
-                            <h5 class="card-title">${post.title}</h5>
-                            <p class="card-text text-muted">${post.summary}</p>
-                        </div>
-                        <div class="card-footer bg-transparent">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">
-                                    <i class="fas fa-user"></i> ${post.author}
-                                </small>
-                                <a href="/science/post/${post.id}/" class="btn btn-sm btn-primary">查看详情</a>
+                    html += `
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="card science-post-card h-100" data-id="${post.id}">
+                                <img src="/static/img/blog-${Math.floor(Math.random() * 6) + 1}.png" class="card-img-top" alt="文章图片">
+                                <div class="card-body">
+                                    <h5 class="card-title">${post.title}</h5>
+                                    <p class="card-text text-muted">${post.summary}</p>
+                                </div>
+                                <div class="card-footer bg-transparent">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            <i class="fas fa-user"></i> ${post.author}
+                                        </small>
+                                        <a href="/blog/${post.id}/" class="btn btn-sm btn-primary">查看详情</a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            `;
+                    `;
         });
         $('#sciencePostsList').html(html);
     }

@@ -32,7 +32,8 @@ from myapp.views import (
     answer_question,get_user_profile,
     update_user_profile, delete_account,save_reminder_settings,science_posts,
     create_science_post, science_post_detail,
-    calendar_view,get_sleep_data
+    calendar_view,get_sleep_data,search_posts,
+    add_science_comment
 )
 from myapp.sleep_challenge_views import (
     get_challenges, create_challenge,
@@ -65,7 +66,7 @@ urlpatterns = [
     path('profile/', profile, name='profile'),
     path('api/users/profile/', get_user_profile, name='get_user_profile'),
     path('api/users/profile/update/', update_user_profile, name='update_user_profile'),
-    path('blog-details/', blog_details, name='blog_details'),
+    path('blog/<str:doc_id>/', blog_details, name='blog_details'),
     path('ai-assistant/', ai_assistant, name='ai_assistant'),
     path('stress-assessment/', render_stress_assessment, name='stress_assessment'),
     path('forum-topic/<str:post_id>/', forum_topic, name='forum_topic'),
@@ -108,7 +109,8 @@ urlpatterns = [
     path('api/science/post/create/', create_science_post, name='create_science_post'),
     path('api/science/post/<str:post_id>/', science_post_detail, name='science_post_detail'),
     path('api/science/post/<str:post_id>/like/', toggle_like, name='science_toggle_like'),
-    path('api/science/post/<str:post_id>/comment/', add_comment, name='science_add_comment'),
+    path('api/science/post/<str:post_id>/comment/', add_science_comment, name='science_add_comment'),
+    path('api/search/posts/', search_posts, name='search_posts'),
 
     path('api/users/delete-account/', delete_account, name='delete_account'),
     path('api/users/reminder-settings/', save_reminder_settings, name='save_reminder_settings'),
