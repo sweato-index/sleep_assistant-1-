@@ -201,10 +201,13 @@ class SleepRecord(models.Model):
     record_id = models.CharField(primary_key=True, max_length=15)
     user = models.ForeignKey('User', models.DO_NOTHING, null=True)
     record_time = models.DateTimeField()
+    sleep_hours = models.FloatField()
     sleep_time = models.DateTimeField()
-    wake_time = models.DateTimeField()
+    wake_time = models.DateTimeField(null=True, blank=True)
     rating = models.CharField(max_length=2, blank=True, null=True)
 
+    def __str__(self):
+        return f"{self.user.username} - {self.sleep_time}"
     class Meta:
         managed = True
         db_table = 'sleep_record'

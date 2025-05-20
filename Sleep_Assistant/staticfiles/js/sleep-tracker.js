@@ -1,7 +1,42 @@
 (() => {
+
+
+
+
+    document.getElementById('quickRecordForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const formData = new FormData();
+    const recordDate = document.getElementById('recordDate').value;
+    const sleepHours = document.getElementById('sleepHours').value;
+    const sleepQuality = document.getElementById('sleepQuality').value;
+
+    formData.append('record_date', recordDate);
+    formData.append('sleep_hours', sleepHours);
+    formData.append('sleepQuality', sleepQuality);
+
+    fetch('/api/sleep-record/', {
+        method: 'POST',
+        headers: {
+        'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: formData,
+        credentials: 'include'  // 发送 sessionid 保证登录状态
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('submitStatus').textContent =
+            data.message || (data.status === 'success' ? '保存成功' : '保存失败');
+    })
+    .catch(() => {
+        document.getElementById('submitStatus').textContent = '请求出错，请稍后重试';
+    });
+    });
+
     // 私有变量
     let sleepData = {};
     let calendar, durationChart, qualityChart;
+    const API_ENDPOINT = '/api/sleep-records/';
     let dailyChart = null;
 
     // 初始化函数
@@ -9,7 +44,7 @@
         loadLocalData();
         initCalendar();
         initCharts();
-        bindEvents();
+        
         initTooltips();
     };
 
@@ -26,34 +61,80 @@
     };
 
     // 初始化日历
-    const initCalendar = () => {
+    const initCalendar = async () => {
         const calendarEl = document.getElementById('calendar');
+        
         calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
-            events: generateCalendarEvents(),
+            locale: 'zh-cn',
+            events: async (fetchInfo, successCallback) => {
+                try {
+                    const response = await fetch(`${API_ENDPOINT}?start=${fetchInfo.startStr}&end=${fetchInfo.endStr}`);
+                    const records = await response.json();
+                    successCallback(records.map(transformEventData));
+                } catch (error) {
+                    console.error('日历数据加载失败:', error);
+                }
+            },
             eventDidMount: handleEventMount,
-            dateClick: handleDateClick,
             eventClick: handleEventClick
         });
+        
         calendar.render();
     };
+
+
+    const transformEventData = (record) => ({
+        id: record.record_id,
+        title: `${getQualityIcon(record.rating)} ${record.duration}h`,
+        start: record.sleep_time,
+        end: record.wake_time,
+        extendedProps: {
+            sleep_time: formatTime(record.sleep_time),
+            wake_time: formatTime(record.wake_time),
+            duration: record.duration,
+            stages: record.stages  // 假设后端返回睡眠阶段数据
+        }
+    });
+
+    
+
+
+
     // 新增事件点击处理函数
-    const handleEventClick = (info) => {
-        const detailData = sleepData[info.event.startStr];
-        if (!detailData) return;
+    const handleEventClick = async (info) => {
+        try {
+            const response = await fetch(`${API_ENDPOINT}${info.event.id}/`);
+            const detailData = await response.json();
 
-        // 填充基础数据
-        document.getElementById('detailDate').textContent = info.event.startStr;
-        document.getElementById('detailHours').textContent = `${detailData.hours}小时`;
-        document.getElementById('detailQuality').textContent = 
-        ['极差', '较差', '一般', '良好', '优秀'][detailData.quality - 1];
+            // 填充基础数据
+            document.getElementById('detailDate').textContent = 
+                new Date(detailData.sleep_time).toLocaleDateString();
+            document.getElementById('detailSleepTime').textContent = 
+                formatTime(detailData.sleep_time);
+            document.getElementById('detailWakeTime').textContent = 
+                formatTime(detailData.wake_time);
+            document.getElementById('detailDuration').textContent = 
+                `${detailData.duration}小时`;
+            document.getElementById('detailRating').textContent = 
+                getQualityLabel(detailData.rating);
 
-        // 生成小时分布图
-        renderDailyChart(detailData);
-        
-        // 显示模态框
-        new bootstrap.Modal('#detailModal').show();
+            // 生成图表
+            renderDailyChart(detailData.stages);
+            new bootstrap.Modal('#detailModal').show();
+        } catch (error) {
+            showToast('详情加载失败', 'error');
+        }
     };
+
+    const formatTime = (isoString) => 
+        new Date(isoString).toLocaleTimeString('zh-CN', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        });
+
+
+
     // 生成日历事件
     
     const generateCalendarEvents = () => {
@@ -76,30 +157,26 @@
     const getQualityIcon = quality => 
         ['😞', '😕', '😐', '😊', '😄'][quality - 1];
     
-    const renderDailyChart = (data) => {
+    const renderDailyChart = (stages) => {
         const ctx = document.getElementById('dailyChart');
         
-        // 销毁旧图表
         if (dailyChart) dailyChart.destroy();
-    
-        // 生成示例数据（需根据实际数据结构调整）
-        const chartData = {
-            labels: ['深度睡眠', '浅度睡眠', '清醒时间'],
-            datasets: [{
-                data: [detailData.hours * 0.6, detailData.hours * 0.3, 24 - detailData.hours],
-                backgroundColor: ['#4CAF50', '#FFC107', '#F44336']
-            }]
-        };
-    
+        
         dailyChart = new Chart(ctx, {
             type: 'doughnut',
-            data: chartData,
+            data: {
+                labels: ['深度睡眠', '浅度睡眠', '快速眼动', '清醒时间'],
+                datasets: [{
+                    data: Object.values(stages),
+                    backgroundColor: ['#4CAF50', '#FFC107', '#2196F3', '#F44336']
+                }]
+            },
             options: {
                 plugins: {
                     tooltip: {
                         callbacks: {
-                            label: (context) => 
-                                `${context.label}: ${context.raw.toFixed(1)}小时`
+                            label: (ctx) => 
+                                `${ctx.label}: ${ctx.raw.toFixed(1)}小时`
                         }
                     }
                 }
@@ -107,6 +184,10 @@
         });
     };
     
+    const getQualityLabel = (rating) => 
+        ['极差', '较差', '一般', '良好', '优秀'][rating - 1];
+
+
     // 睡眠质量分类
     const getQualityClass = quality => {
         const qualityMap = {
@@ -265,8 +346,7 @@
     ][quality - 1];
     // 绑定事件
     const bindEvents = () => {
-        document.getElementById('quickRecordForm')
-            .addEventListener('submit', handleFormSubmit);
+        
     };
 
     // 表单提交处理

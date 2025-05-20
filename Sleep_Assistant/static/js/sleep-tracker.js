@@ -272,36 +272,69 @@
     // 表单提交处理
     const handleFormSubmit = e => {
         e.preventDefault();
-        const newRecord = getFormData();
+        const form = e.target;
+        const formData = new FormData();
         
-        // 更新数据
-        updateData(newRecord);
-        saveData();
+        // 必填字段
+        formData.append('sleep_time', form.recordDate.value + 'T' + form.sleepTime.value);
+        formData.append('sleepQuality', form.sleepQuality.value);
         
-        // 获取最新事件数据
-        const newEvent = generateCalendarEvents()
-            .find(event => event.start === newRecord.date);
-    
-        // 移除旧事件（如果存在）
-        const existingEvents = calendar.getEvents();
-        const oldEvent = existingEvents.find(e => e.startStr === newRecord.date);
-        if (oldEvent) oldEvent.remove();
-    
-        // 添加新事件
-        if (newEvent) calendar.addEvent(newEvent);
-    
-        // 强制重渲染
-        calendar.updateSize();
-        calendar.render();
-    
-        // 更新其他可视化组件
-        updateVisualizations();
-        resetForm(e.target);
+        // 可选字段 - 要么提供wake_time，要么提供sleep_hours
+        if (form.wakeTime.value) {
+            formData.append('wake_time', form.recordDate.value + 'T' + form.wakeTime.value);
+        } else if (form.sleepHours.value) {
+            formData.append('sleep_hours', form.sleepHours.value);
+        } else {
+            alert('请提供醒来时间或睡眠时长');
+            return;
+        }
+
+        fetch('/api/sleep-record/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            credentials: 'include',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'success') {
+                const newRecord = getFormData();
+                updateData(newRecord);
+                saveData();
+                
+                // 获取最新事件数据
+                const newEvent = generateCalendarEvents()
+                    .find(event => event.start === newRecord.date);
+            
+                // 移除旧事件（如果存在）
+                const existingEvents = calendar.getEvents();
+                const oldEvent = existingEvents.find(e => e.startStr === newRecord.date);
+                if (oldEvent) oldEvent.remove();
+            
+                // 添加新事件
+                if (newEvent) calendar.addEvent(newEvent);
+            
+                // 强制重渲染
+                calendar.updateSize();
+                calendar.render();
+            
+                // 更新其他可视化组件
+                updateVisualizations();
+                resetForm(e.target);
+            }
+        })
+        .catch(err => {
+            console.error('提交失败:', err);
+        });
     };
 
     // 获取表单数据
     const getFormData = () => ({
         date: document.getElementById('recordDate').value,
+        sleepTime: document.getElementById('sleepTime').value,
+        wakeTime: document.getElementById('wakeTime').value,
         hours: parseFloat(document.getElementById('sleepHours').value),
         quality: parseInt(document.getElementById('sleepQuality').value)
     });
@@ -309,6 +342,8 @@
     // 更新数据
     const updateData = newRecord => {
         sleepData[newRecord.date] = {
+            sleepTime: newRecord.sleepTime,
+            wakeTime: newRecord.wakeTime,
             hours: newRecord.hours, 
             quality: newRecord.quality
         };

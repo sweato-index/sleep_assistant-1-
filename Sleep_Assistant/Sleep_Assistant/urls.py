@@ -31,7 +31,8 @@ from myapp.views import (
     create_question, question_detail,
     answer_question,get_user_profile,
     update_user_profile, delete_account,save_reminder_settings,science_posts,
-    create_science_post, science_post_detail
+    create_science_post, science_post_detail,
+    calendar_view,get_sleep_data
 )
 from myapp.sleep_challenge_views import (
     get_challenges, create_challenge,
@@ -45,7 +46,7 @@ from myapp.views import (
     update_user, delete_user,
     manage_content, system_settings
 )
-
+from myapp.sleep_record_views import SleepRecordAPI
 urlpatterns = [
     # 自定义管理员路由
     path('api/admin/dashboard/', admin_dashboard, name='admin_dashboard'),
@@ -112,4 +113,7 @@ urlpatterns = [
     path('api/users/delete-account/', delete_account, name='delete_account'),
     path('api/users/reminder-settings/', save_reminder_settings, name='save_reminder_settings'),
 
+    path('calendar/', calendar_view, name='calendar'),
+    path('api/sleep-data/', get_sleep_data),
+    path('api/sleep-record/', SleepRecordAPI.as_view(), name='sleep_record_api'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

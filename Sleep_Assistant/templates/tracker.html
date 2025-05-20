@@ -136,24 +136,77 @@
                     <form id="quickRecordForm">
                         <div class="mb-3">
                             <label class="form-label">选择日期</label>
-                            <input type="date" class="form-control" id="recordDate" required>
+                            <input type="date" class="form-control" id="recordDate" name="sleep_time" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">入睡时间</label>
+                            <input type="time" class="form-control" id="sleepTime" name="sleep_time_time" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">醒来时间</label>
+                            <input type="time" class="form-control" id="wakeTime" name="wake_time" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">睡眠时长（小时）</label>
-                            <input type="number" step="0.1" class="form-control" id="sleepHours" required>
+                            <input type="number" step="0.1" class="form-control" id="sleepHours" name="sleep_hours" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">睡眠质量</label>
-                            <select class="form-select" id="sleepQuality" required>
-                                <option value="5">😄 优秀 (90-100分)</option>
-                                <option value="4">😊 良好 (75-89分)</option>
-                                <option value="3">😐 一般 (60-74分)</option>
-                                <option value="2">😕 较差 (40-59分)</option>
-                                <option value="1">😞 极差 (0-39分)</option>
+                            <select class="form-select" id="sleepQuality" name="sleepQuality" required>
+                            <option value="5">😄 优秀 (90-100分)</option>
+                            <option value="4">😊 良好 (75-89分)</option>
+                            <option value="3">😐 一般 (60-74分)</option>
+                            <option value="2">😕 较差 (40-59分)</option>
+                            <option value="1">😞 极差 (0-39分)</option>
                             </select>
                         </div>
                         <button type="submit" class="btn btn-primary w-100">保存记录</button>
-                    </form>
+                        </form>
+                            <div id="submitStatus" style="margin-top:10px;"></div>
+
+                            <script>
+                            document.getElementById('quickRecordForm').addEventListener('submit', function(e) {
+                            e.preventDefault();
+
+                            const form = e.target;
+                            const formData = new FormData();
+                            formData.append('sleep_time', form.recordDate.value);
+                            formData.append('sleep_hours', form.sleepHours.value);
+                            formData.append('sleepQuality', form.sleepQuality.value);
+
+                            fetch('/api/sleep-record/', {
+                                method: 'POST',
+                                headers: {
+                                'X-CSRFToken': getCookie('csrftoken')
+                                },
+                                credentials: 'include' , // 关键点：让请求带上 session cookie
+                                
+                                body: formData
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                document.getElementById('submitStatus').textContent = data.message || (data.status === 'success' ? '保存成功' : '保存失败');
+                            })
+                            .catch(() => {
+                                document.getElementById('submitStatus').textContent = '请求出错，请稍后重试';
+                            });
+                            });
+
+                            function getCookie(name) {
+                            let cookieValue = null;
+                            if (document.cookie && document.cookie !== '') {
+                                const cookies = document.cookie.split(';');
+                                for (let cookie of cookies) {
+                                cookie = cookie.trim();
+                                if (cookie.startsWith(name + '=')) {
+                                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                    break;
+                                }
+                                }
+                            }
+                            return cookieValue;
+                            }
+                            </script>
                 </div>
             </div>
         </div>
@@ -258,7 +311,155 @@
             </div>
         </div>
     </div>
+    <script>
+  // 取 Cookie（获取 csrftoken）
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let cookie of cookies) {
+        cookie = cookie.trim();
+        if (cookie.startsWith(name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
 
+  // FullCalendar 初始化变量（示例）
+  let calendar;
+
+  // Chart.js 图表变量
+  let durationChart;
+  let qualityChart;
+
+  // 页面加载后调用
+  window.onload = function() {
+    // 先初始化日历和图表框架
+    initCalendar();
+    initCharts();
+
+    // 拉取睡眠记录
+    fetch('/api/sleep-record/', {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'X-CSRFToken': getCookie('csrftoken'),
+        'Accept': 'application/json'
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      const records = data.data;
+      // 渲染日历事件
+      renderCalendar(records);
+      // 渲染图表数据
+      renderCharts(records);
+    })
+    .catch(err => {
+      console.error('获取睡眠记录失败', err);
+    });
+  }
+
+  // 初始化 FullCalendar
+  function initCalendar() {
+    var calendarEl = document.getElementById('calendar');
+    calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+      },
+      events: []  // 先空，稍后填数据
+    });
+    calendar.render();
+  }
+
+  // 把数据库数据转换成 FullCalendar 事件格式并加载
+  function renderCalendar(records) {
+    // 转换数据
+    const events = records.map(r => ({
+      id: r.record_id,
+      title: `睡眠 ${r.sleep_hours} 小时，质量 ${r.rating}`,
+      start: r.sleep_time,
+      allDay: true
+    }));
+
+    calendar.removeAllEvents();
+    calendar.addEventSource(events);
+  }
+
+  // 初始化 Chart.js 图表（空数据）
+  function initCharts() {
+    const ctxDuration = document.getElementById('durationChart').getContext('2d');
+    durationChart = new Chart(ctxDuration, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: '睡眠时长（小时）',
+          data: [],
+          borderColor: 'rgba(75, 192, 192, 1)',
+          fill: false,
+          tension: 0.1
+        }]
+      },
+      options: {
+        scales: {
+          x: { type: 'time', time: { unit: 'day' } },
+          y: { beginAtZero: true }
+        }
+      }
+    });
+
+    const ctxQuality = document.getElementById('qualityChart').getContext('2d');
+    qualityChart = new Chart(ctxQuality, {
+      type: 'bar',
+      data: {
+        labels: ['极差', '较差', '一般', '良好', '优秀'],
+        datasets: [{
+          label: '睡眠质量分布',
+          data: [0, 0, 0, 0, 0],
+          backgroundColor: [
+            '#FF4C4C', '#FF9A4C', '#FFD54C', '#9ACD32', '#4CAF50'
+          ]
+        }]
+      },
+      options: {
+        scales: {
+          y: { beginAtZero: true, stepSize: 1 }
+        }
+      }
+    });
+  }
+
+  // 用数据更新图表
+  function renderCharts(records) {
+    // 睡眠时长趋势图 - 日期排序，按日期取睡眠时长
+    const sortedRecords = records.sort((a,b) => new Date(a.sleep_time) - new Date(b.sleep_time));
+    const labels = sortedRecords.map(r => r.sleep_time);
+    const durationData = sortedRecords.map(r => parseFloat(r.sleep_hours));
+
+    durationChart.data.labels = labels;
+    durationChart.data.datasets[0].data = durationData;
+    durationChart.update();
+
+    // 睡眠质量分布统计
+    const qualityCounts = [0,0,0,0,0];  // index 0对应rating=1, index4对应rating=5
+    records.forEach(r => {
+      const idx = parseInt(r.rating) - 1;
+      if (idx >= 0 && idx < 5) {
+        qualityCounts[idx]++;
+      }
+    });
+
+    qualityChart.data.datasets[0].data = qualityCounts;
+    qualityChart.update();
+  }
+</script>
     <!-- 注册模态框 -->
     <div class="modal fade" id="signupModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -314,6 +515,8 @@
             </div>
         </div>
     </div>
+
+
     <!-- JS here -->
     
     <script src="{% static 'js/jquery.min.js' %}"></script>

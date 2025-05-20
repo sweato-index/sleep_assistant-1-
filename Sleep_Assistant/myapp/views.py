@@ -11,6 +11,8 @@ import json
 import os
 from datetime import datetime
 from django.conf import settings
+from django.views import View
+
 
 def get_all_user_ids(request):
     user_ids = list(User.objects.values_list('user_id', flat=True))
@@ -1715,3 +1717,33 @@ def delete_user(request, user_id):
         })
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+def calendar_view(request):
+    return render(request, 'sleep/calendar.html')
+
+def get_sleep_data(request):
+    records = SleepRecord.objects.all()
+    events = [{
+        'title': f"{r.hours}h (质量{r.quality})",
+        'start': r.date.isoformat(),
+        'extendedProps': {
+            'hours': r.hours,
+            'quality': r.quality
+        }
+    } for r in records]
+    return JsonResponse(events, safe=False)
+
+@csrf_exempt
+def add_sleep_record(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        date = datetime.strptime(data['date'], '%Y-%m-%d').date()
+        hours = float(data['hours'])
+        quality = int(data['quality'])
+
+        SleepRecord.objects.update_or_create(
+            date=date,
+            defaults={'hours': hours, 'quality': quality}
+        )
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'invalid'}, status=400)
