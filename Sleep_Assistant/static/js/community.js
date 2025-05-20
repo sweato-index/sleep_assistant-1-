@@ -371,24 +371,35 @@ $(document).ready(function() {
     loadPosts();
     loadExpertQuestions();
 
-    // 其他原有功能保持不变
+    // 处理页面加载时的锚点定位
     if(window.location.hash) {
         const target = $(window.location.hash);
         if(target.length) {
-            $('html, body').animate({
-                scrollTop: target.offset().top - 100
-            }, 800);
+            // 确保tab先显示再滚动
+            $('.nav-tabs a[href="' + window.location.hash + '"]').tab('show');
+            setTimeout(() => {
+                $('html, body').animate({
+                    scrollTop: target.offset().top - 100
+                }, 800);
+            }, 100);
         }
     }
 
+    // 处理tab切换和滚动
     $('.nav-tabs a').click(function(e) {
         const target = $(this).attr('href');
         if(target && target.startsWith('#')) {
             e.preventDefault();
             $(this).tab('show');
-            $('html, body').animate({
-                scrollTop: $(target).offset().top - 100
-            }, 800);
+            // 确保tab内容加载完成后再滚动
+            setTimeout(() => {
+                const targetElement = $(target);
+                if(targetElement.length) {
+                    $('html, body').animate({
+                        scrollTop: targetElement.offset().top - 100
+                    }, 800);
+                }
+            }, 100);
         }
     });
 

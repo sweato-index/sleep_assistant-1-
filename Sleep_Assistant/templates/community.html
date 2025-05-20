@@ -65,7 +65,7 @@
                                             <li><a href="#forum">论坛</a></li>
                                             <li><a href="#groups">群组</a></li>
                                             <li><a href="#qna">专家问答</a></li>
-                                            <li><a href="#diary">睡眠日记</a></li>
+                                        <li><a href="#stress">压力测试</a></li>
                                             <li><a href="#challenges">挑战活动</a></li>
                                         </ul>
                                     </li>
@@ -117,7 +117,7 @@
                     <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#forum">论坛/讨论区</a></li>
                     <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#groups">群组</a></li>
                     <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#qna">专家问答</a></li>
-                    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#diary">睡眠日记</a></li>
+                    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#stress">压力测试</a></li>
                     <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#challenges">挑战活动</a></li>
                 </ul>
 
@@ -311,37 +311,52 @@
 
                     
 
-                    <!-- 睡眠日记 -->
-                    <div id="diary" class="tab-pane fade">
+                    <!-- 压力测试 -->
+                    <div id="stress" class="tab-pane fade">
                         <div class="row">
                             <div class="col-md-8">
-                                <div class="diary-sharing">
-                                    <h3>分享你的睡眠日记</h3>
-                                    <form>
-                                        <div class="form-group">
-                                            <label>睡眠时长</label>
-                                            <input type="text" class="form-control">
+                                <div class="stress-assessment">
+                                    <h3>压力水平评估</h3>
+                                    <p class="lead mb-4">评估您的压力水平并获取个性化建议</p>
+                                    
+                                    <div class="card mb-4">
+                                        <div class="card-body">
+                                            <h5 class="card-title">快速压力测试</h5>
+                                            <p>回答几个简单问题，了解您的压力水平</p>
+                                            <a href="{% url 'stress_assessment' %}" class="btn btn-primary">
+                                                开始压力测试
+                                            </a>
                                         </div>
-                                        <div class="form-group">
-                                            <label>睡眠质量评分</label>
-                                            <input type="number" min="1" max="10" class="form-control">
+                                    </div>
+                                    
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">压力管理建议</h5>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-check-circle text-success mr-2"></i>每天进行15-30分钟冥想</li>
+                                                <li><i class="fas fa-check-circle text-success mr-2"></i>保持规律的运动习惯</li>
+                                                <li><i class="fas fa-check-circle text-success mr-2"></i>保证7-8小时优质睡眠</li>
+                                                <li><i class="fas fa-check-circle text-success mr-2"></i>学习时间管理技巧</li>
+                                                <li><i class="fas fa-check-circle text-success mr-2"></i>保持社交联系</li>
+                                            </ul>
                                         </div>
-                                        <div class="form-group">
-                                            <label>备注</label>
-                                            <textarea class="form-control" rows="3"></textarea>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary">分享日记</button>
-                                    </form>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="diary-tips">
-                                    <h3>改善建议</h3>
-                                    <ul>
-                                        <li>保持规律作息</li>
-                                        <li>睡前避免使用电子设备</li>
-                                        <li>保持卧室环境舒适</li>
-                                    </ul>
+                                <div class="stress-tips">
+                                    <h3>减压小贴士</h3>
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">快速减压方法</h5>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-spa text-info mr-2"></i>深呼吸练习</li>
+                                                <li><i class="fas fa-music text-info mr-2"></i>听舒缓音乐</li>
+                                                <li><i class="fas fa-walking text-info mr-2"></i>短暂散步</li>
+                                                <li><i class="fas fa-book text-info mr-2"></i>阅读放松</li>
+                                            </ul>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
